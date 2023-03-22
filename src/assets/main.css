@@ -1,0 +1,78 @@
+@import "./base.css";
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap");
+
+/* reset css */
+body,
+html,
+* {
+	box-sizing: border-box;
+	font-size: 14px;
+	font-family: "Quicksand", sans-serif;
+}
+
+ul {
+	list-style-type: none;
+	padding-left: 0;
+}
+
+img {
+	max-width: 100%;
+}
+
+input,
+button,
+textarea,
+section,
+option {
+	box-sizing: border-box;
+	font-size: 14px;
+	font-family: "Quicksand", sans-serif;
+}
+
+/* reset dexextreme styles */
+.dx-theme-generic-typography a {
+	color: unset;
+}
+.dx-theme-generic-typography .dx-font-xl,
+.dx-theme-generic-typography h1 {
+	font-weight: bold;
+	font-size: 28px;
+}
+/* util */
+.container {
+	max-width: 1140px;
+	margin: auto;
+}
+
+.w-full {
+	width: 100%;
+}
+
+.h-full {
+	height: 100%;
+}
+
+.breadcrumb {
+	margin-top: -1px;
+	background: transparent;
+	margin-bottom: 20px;
+	padding: 0 0px;
+	display: none;
+}
+
+a {
+	text-decoration: none;
+	transition: 0.35s;
+	color: var(--color-text);
+}
+
+@media (hover: hover) {
+	a:hover {
+	}
+}
+
+@media (min-width: 997px) {
+	.breadcrumb {
+		display: block;
+	}
+}

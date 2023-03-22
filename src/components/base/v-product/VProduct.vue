@@ -1,0 +1,64 @@
+<template>
+	<div class="product col-6 col-md-4 col-lg-3">
+		<router-link class="wrapper" :to="'/product-detail/' + item.slug">
+			<img :src="'data:image/jpeg;base64,' + item.images[0].content" class="product-image" alt="product.image" />
+			<div class="product-detail">
+				<div class="product-detail-brand">{{ item.brand?.name }}</div>
+				<div class="product-detail-name">{{ item.name }}</div>
+				<div class="product-detail-price">{{ item.price }}</div>
+			</div>
+		</router-link>
+	</div>
+</template>
+
+<script>
+export default {
+	components: {},
+	data() {
+		return {
+			color: "green",
+		};
+	},
+	props: {
+		item: {
+			type: Object,
+			default: null,
+		},
+	},
+	computed: {},
+	methods: {},
+};
+</script>
+
+<style scoped lang="scss">
+.product {
+	padding-left: 6px;
+	padding-right: 6px;
+	.wrapper {
+		background: var(--color-product-background);
+		display: flex;
+		flex-direction: column;
+
+		.product-image {
+			cursor: pointer;
+		}
+
+		.product-detail {
+			padding: 8px;
+			.product-detail-brand {
+				text-transform: uppercase;
+				font-size: 0.9rem;
+			}
+			.product-detail-name {
+			}
+			.product-detail-price {
+				margin-top: 40px;
+				font-weight: bold;
+				&::after {
+					content: "d";
+				}
+			}
+		}
+	}
+}
+</style>
