@@ -85,24 +85,7 @@ export default {
 			cartStore: useCartStore(),
 		};
 	},
-	props: {
-		target: {
-			type: String,
-			default: ".cart-wrapper",
-		},
-		position: {
-			type: [String, Object],
-			default: {
-				my: "right top",
-				at: "bottom",
-				offset: "10 0",
-			},
-		},
-		title: {
-			type: String,
-			default: "giỏ hàng",
-		},
-	},
+	props: {},
 	mounted() {
 		this.items = CartApi.getCart();
 	},
@@ -116,16 +99,10 @@ export default {
 		},
 	},
 	watch: {
-		"cartStore.hasUpdate"(hasUpdate, oldHasUpdate) {
+		"cartStore.hasUpdate"(hasUpdate) {
 			if (hasUpdate == true) {
 				this.cartStore.hasUpdate = false;
 				this.items = CartApi.getCart();
-			}
-		},
-		"cartStore.hasOpenCart"(hasOpenCart, oldHasOpenCart) {
-			if (hasOpenCart == true) {
-				this.cartStore.hasOpenCart = false;
-				this.isVisible = true;
 			}
 		},
 	},

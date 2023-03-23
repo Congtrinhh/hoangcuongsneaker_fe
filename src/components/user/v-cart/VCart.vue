@@ -4,7 +4,7 @@
 		<img class="cart-icon" src="@/assets/imgs/icons/shopping-cart.png" />
 		<dx-popover
 			:width="420"
-			:visible="isVisible"
+			:visible="cartStore.hasOpenCart"
 			:target="target"
 			:position="position"
 			:show-title="true"
@@ -49,7 +49,7 @@
 						<div class="summary-text">Tổng tiền</div>
 						<div class="summary-price">{{ totalPrice }}</div>
 					</div>
-					<router-link class="btn-view-cart-detail" to="/cart-detail">
+					<router-link class="btn-view-cart-detail" to="/cart-detail" @click="hideCartComponent">
 						<v-button class="w-full">XEM GIỎ HÀNG</v-button>
 					</router-link>
 				</div>
@@ -68,7 +68,7 @@ export default {
 	data() {
 		return {
 			items: [],
-			isVisible: false,
+			// isVisible: false,
 			cartStore: useCartStore(),
 		};
 	},
@@ -111,17 +111,15 @@ export default {
 		},
 		"cartStore.hasOpenCart"(hasOpenCart, oldHasOpenCart) {
 			if (hasOpenCart == true) {
-				this.cartStore.hasOpenCart = false;
-				this.isVisible = true;
 			}
 		},
 	},
 	methods: {
 		handlePopoverHiding() {
-			this.isVisible = false;
+			this.cartStore.hasOpenCart = false;
 		},
 		handleToggle() {
-			this.isVisible = !this.isVisible;
+			this.cartStore.hasOpenCart = !this.cartStore.hasOpenCart;
 		},
 		deleteItem(itemToDelete) {
 			// save items info after every single update
@@ -144,6 +142,9 @@ export default {
 		},
 		getTotalPriceItem(item) {
 			return item.sellPrice * item.quantity;
+		},
+		hideCartComponent() {
+			this.cartStore.hasOpenCart = false;
 		},
 	},
 };

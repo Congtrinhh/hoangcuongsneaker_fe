@@ -1,11 +1,17 @@
 <template>
 	<div class="product col-6 col-md-4 col-lg-3">
-		<router-link class="wrapper" :to="'/product-detail/' + item.slug">
-			<img :src="'data:image/jpeg;base64,' + item.images[0].content" class="product-image" alt="product.image" />
+		<router-link class="wrapper" :to="'/product-detail/' + item?.slug">
+			<div class="img-parent">
+				<img
+					:src="'data:image/jpeg;base64,' + item?.images[0]?.content"
+					class="product-image"
+					alt="hình ảnh sản phẩm"
+				/>
+			</div>
 			<div class="product-detail">
-				<div class="product-detail-brand">{{ item.brand?.name }}</div>
-				<div class="product-detail-name">{{ item.name }}</div>
-				<div class="product-detail-price">{{ item.price }}</div>
+				<div class="product-detail-brand">{{ item?.brand?.name }}</div>
+				<div class="product-detail-name">{{ item?.name }}</div>
+				<div class="product-detail-price">{{ item?.price || 0 }}</div>
 			</div>
 		</router-link>
 	</div>
@@ -38,6 +44,13 @@ export default {
 		background: var(--color-product-background);
 		display: flex;
 		flex-direction: column;
+
+		.img-parent {
+			height: 238px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 
 		.product-image {
 			cursor: pointer;
