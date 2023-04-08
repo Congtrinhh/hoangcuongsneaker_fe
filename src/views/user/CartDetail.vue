@@ -113,18 +113,21 @@ export default {
 			this.items.splice(index, 1);
 
 			CartApi.updateCart(this.items);
+			this.cartStore.hasUpdate = true;
 		},
 		decreaseQuantity(item) {
 			const newQuantity = item.quantity - 1;
 			// api check quantity
 			item.quantity = newQuantity;
 			CartApi.updateCartItem(item);
+			this.cartStore.hasUpdate = true;
 		},
 		increaseQuantity(item) {
 			const newQuantity = item.quantity + 1;
 			// api check quantity
 			item.quantity = newQuantity;
 			CartApi.updateCartItem(item);
+			this.cartStore.hasUpdate = true;
 		},
 		getTotalPriceItem(item) {
 			return item.sellPrice * item.quantity;

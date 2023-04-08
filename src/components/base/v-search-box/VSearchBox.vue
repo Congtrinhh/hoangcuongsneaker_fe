@@ -12,6 +12,8 @@
 		<button class="v-search-box-button" @click="handleClick">
 			<img src="@/assets/imgs/icons/search.png" alt="search icon" />
 		</button>
+
+		<img class="icon-mobile" src="@/assets/imgs/icons/search.png" alt="search icon" />
 	</div>
 </template>
 
@@ -43,7 +45,6 @@ export default {
 	},
 	methods: {
 		handleClick($event) {
-			debugger;
 			this.$emit("change", this.internalSearchKey);
 			console.log(this.internalSearchKey);
 		},
@@ -68,6 +69,8 @@ export default {
 	border-radius: 8px;
 	border: 1px solid var(--color-input-border);
 	outline: transparent;
+
+	display: none;
 }
 .v-search-box-button {
 	position: absolute;
@@ -85,4 +88,20 @@ export default {
 		width: 16px;
 	}
 }
+
+.icon-mobile {
+	display: inline-block;
+}
+
+// Responsive
+@media screen and (min-width: 992px) {
+	.v-search-box-input {
+		display: block;
+	}
+
+	.icon-mobile {
+		display: none;
+	}
+}
+//
 </style>

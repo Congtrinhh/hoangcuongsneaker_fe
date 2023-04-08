@@ -17,7 +17,7 @@ class BaseApi {
 	create(payload) {
 		return axios.post(`${this.controller}`, payload);
 	}
-	update(payload, id) {
+	update(id, payload) {
 		return axios.put(`${this.controller}/${id}`, payload);
 	}
 	delete(id) {

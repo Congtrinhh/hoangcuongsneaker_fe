@@ -1,5 +1,5 @@
 <template>
-	<button :class="['v-button', { 'icon-only': hasIconOnly, 'text-only': hasTextOnly }]">
+	<button :class="['v-button', { 'icon-only': hasIconOnly, 'text-only': hasTextOnly, 'hover-effect': hoverEffect }]">
 		<slot
 			><span class="v-button-icon"> </span>
 			<div class="v-button-text">{{ text }}</div></slot
@@ -32,6 +32,10 @@ export default {
 		iconSize: {
 			type: Number,
 			default: 20,
+		},
+		hoverEffect: {
+			type: Boolean,
+			default: true,
 		},
 	},
 	computed: {},
@@ -82,14 +86,14 @@ export default {
 		transition: transform 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86),
 			-webkit-transform 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86);
 	}
-	&:hover,
-	&:focus {
+	&.hover-effect:hover,
+	&.hover-effect:focus {
 		border-color: #8b572a;
 		color: #ffffff;
 	}
 
-	&:hover::before,
-	&:focus::before {
+	&.hover-effect:hover::before,
+	&.hover-effect:focus::before {
 		-webkit-transform-origin: right center;
 		transform-origin: right center;
 		-webkit-transform: scale(0, 1);

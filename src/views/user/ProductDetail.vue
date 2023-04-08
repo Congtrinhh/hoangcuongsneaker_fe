@@ -244,6 +244,7 @@ export default {
 			}
 		},
 		handleAddToCart() {
+			debugger;
 			if (!this.selectedProductInventory || !this.selectedProductInventory.id) {
 				console.log("No product inventory found");
 				return;

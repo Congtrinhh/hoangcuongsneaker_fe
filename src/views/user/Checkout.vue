@@ -6,7 +6,7 @@
 				<div class="col-12 col-lg-5">
 					<div class="cart-info">
 						<section class="cart-item-wrapper">
-							<div class="cart-item" v-for="cartItem in items" :key="cartItem.id">
+							<div class="cart-item" v-for="cartItem in orderItems" :key="cartItem.id">
 								<div class="img-parent">
 									<img :src="'data:image/jpeg;base64,' + cartItem.image" alt="" />
 									<div class="quantity-counter">{{ cartItem.quantity }}</div>
@@ -46,7 +46,10 @@
 				<div class="col-12 col-lg-7">
 					<div class="checkout-info">
 						<h1 class="website-brand d-none d-lg-block mb-2">HoangCuongSneaker</h1>
-						<div class="breadcrumb"><span>Giỏ hàng</span> &gt; <span>Thông tin đơn hàng</span></div>
+						<div class="breadcrumb">
+							<router-link to="/cart-detail"><span>Giỏ hàng</span></router-link> &gt;
+							<span>Thông tin đơn hàng</span>
+						</div>
 
 						<section class="user-info">
 							<div class="title">Thông tin đơn hàng</div>
@@ -56,44 +59,53 @@
 							<!-- name -->
 							<div class="v-form-group">
 								<label for="" class="v-form-label">Họ tên</label>
-								<dx-text-box placeholder="Họ tên" />
+								<dx-text-box placeholder="Họ tên" v-model="userInfo.userName" />
+							</div>
+
+							<!-- email -->
+							<div class="v-form-group">
+								<label for="" class="v-form-label">Email</label>
+								<dx-text-box placeholder="Email" v-model="userInfo.email" />
 							</div>
 
 							<!-- phone -->
 							<div class="v-form-group">
 								<label for="" class="v-form-label">Số điện thoại</label>
 								<!-- <DxTextBox :mask-rules="{ X: /[02-9]/ }" mask="+1 (X00) 000-0000" /> -->
-								<DxTextBox placeholder="Số điện thoại" mode="tel" />
+								<DxTextBox placeholder="Số điện thoại" mode="tel" v-model="userInfo.phone" />
 							</div>
 
-							<!-- specific address -->
-							<div class="v-form-group">
-								<label for="" class="v-form-label">Địa ch</label>
-								<dx-text-box placeholder="Địa chỉ" />
-							</div>
 							<!-- 3 select box: province - city - ward -->
 							<div class="v-form-group">
 								<label for="" class="v-form-label">Tỉnh/thành phố - quận huyện - xã phường</label>
 								<div class="address-wrapper">
 									<DxSelectBox
 										:data-source="provinceDataSource"
-										value-expr="id"
 										display-expr="name"
 										placeholder="Tỉnh"
+										@valueChanged="handleProvinceChanged"
+										v-model="userInfo.province"
 									/>
 									<DxSelectBox
-										:data-source="cityDataSource"
-										value-expr="id"
+										:data-source="districtDataSource"
 										display-expr="name"
 										placeholder="Thành phố"
+										@valueChanged="handleDistrictChanged"
+										v-model="userInfo.district"
 									/>
 									<DxSelectBox
 										:data-source="wardDataSource"
-										value-expr="id"
 										display-expr="name"
 										placeholder="Quận/huyện/xã"
+										v-model="userInfo.ward"
 									/>
 								</div>
+							</div>
+
+							<!-- specific address -->
+							<div class="v-form-group">
+								<label for="" class="v-form-label">Địa chỉ cụ thể</label>
+								<dx-text-box placeholder="Số nhà, tổ dân phố" v-model="userInfo.specificAddress" />
 							</div>
 						</section>
 
@@ -105,6 +117,10 @@
 								display-expr="text"
 								layout="horizontal"
 							/>
+						</section>
+
+						<section class="my-3">
+							<v-button @click="handleSave">Hoàn tất đơn hàng</v-button>
 						</section>
 					</div>
 				</div>
@@ -119,15 +135,37 @@ import DxAccordion from "devextreme-vue/accordion";
 import DxTextBox from "devextreme-vue/text-box";
 import DxRadioGroup from "devextreme-vue/radio-group";
 import CartApi from "@/apis/user/cart-api";
+import OrderApi from "@/apis/user/order-api";
 import { useCartStore } from "@/stores/cart";
+import CustomStore from "devextreme/data/custom_store";
 
 export default {
 	components: { DxTextBox, DxSelectBox, DxRadioGroup, DxAccordion },
 	data() {
 		return {
-			paymentMethods: [{ id: 1, value: "cod", text: "COD (Trả tiền khi nhận hàng)" }],
-			items: [],
+			paymentMethods: [{ id: 1, value: "cod", text: "COD (Thanh toán khi nhận hàng)" }],
+			orderItems: [],
 			cartStore: useCartStore(),
+			provinceDataSource: new CustomStore({
+				key: "id",
+				load: (loadOptions) => {
+					return OrderApi.getProvinces()
+						.then((res) => {
+							if (res.data.isSuccessful) {
+								let data = res.data.data;
+								return { data, totalRecord: data.length };
+							}
+						})
+						.catch((err) => console.log(err));
+				},
+				byKey: () => {},
+			}),
+			districtDataSource: [],
+			wardDataSource: [],
+
+			//#region Model chính: thông tin thanh toán
+			userInfo: {},
+			//#endregion
 		};
 	},
 	props: {
@@ -142,7 +180,7 @@ export default {
 		},
 		totalPrice() {
 			let total = 0;
-			this.items.forEach((item) => {
+			this.orderItems.forEach((item) => {
 				total += item.sellPrice * item.quantity;
 			});
 			return total;
@@ -153,9 +191,55 @@ export default {
 			// tach thanh helper function
 			return item.sellPrice * item.quantity;
 		},
+		handleProvinceChanged(e) {
+			const provinceId = e.value?.id;
+			this.districtDataSource = [];
+			this.wardDataSource = [];
+			OrderApi.getDistricts(provinceId)
+				.then((res) => {
+					if (res.data.isSuccessful) {
+						this.districtDataSource = res.data.data;
+					}
+				})
+				.catch((err) => console.log(err));
+		},
+		handleDistrictChanged(e) {
+			const districtId = e.value?.id;
+			OrderApi.getWards(districtId)
+				.then((res) => {
+					if (res.data.isSuccessful) {
+						this.wardDataSource = res.data.data;
+					}
+				})
+				.catch((err) => console.log(err));
+		},
+		handleSave() {
+			// generate address
+			this.userInfo.address = this.getAddressText();
+
+			const payload = this.getPayload();
+			console.log(payload);
+			OrderApi.create(payload)
+				.then((res) => {
+					debugger;
+				})
+				.catch((err) => console.log(err));
+		},
+		getAddressText() {
+			const province = this.userInfo.province?.name;
+			const district = this.userInfo.district?.name;
+			const ward = this.userInfo.ward?.name;
+			return `${this.userInfo.specificAddress}, ${ward}, ${district}, ${province}`;
+		},
+		getPayload() {
+			let payload = {};
+			payload.user = this.userInfo;
+			payload.orderItems = this.orderItems;
+			return payload;
+		},
 	},
 	mounted() {
-		this.items = CartApi.getCart();
+		this.orderItems = CartApi.getCart();
 	},
 };
 </script>
@@ -335,7 +419,7 @@ section > .title {
 // Responsive
 @media screen and (min-width: 768px) {
 }
-@media screen and (min-width: 997px) {
+@media screen and (min-width: 992px) {
 	.checkoutComponentContainer {
 		flex-direction: row-reverse;
 	}

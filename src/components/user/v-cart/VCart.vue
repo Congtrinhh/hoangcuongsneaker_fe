@@ -156,7 +156,7 @@ export default {
 	cursor: pointer;
 	.cart-quantity {
 		position: absolute;
-		left: 75%;
+		left: 70%;
 		bottom: 70%;
 		background: #d31c1c;
 		border-radius: 50%;

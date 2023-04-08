@@ -11,5 +11,17 @@ const instance = axios.create({
 // Also add/ configure interceptors && all the other cool stuff
 
 // instance.interceptors.request...
+instance.interceptors.response.use(
+	(response) => {
+		return response;
+	},
+	(error) => {
+		if (!error.response) {
+			console.log("Please check your internet connection.");
+		}
+
+		return Promise.reject(error);
+	}
+);
 
 export default instance;

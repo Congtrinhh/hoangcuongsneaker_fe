@@ -9,6 +9,7 @@
 				:show-nav-buttons="showNavButtons"
 				:show-indicator="showIndicator"
 				:height="'50vh'"
+				:width="galleryWidth"
 			></dx-gallery>
 
 			<section class="mt-5 best-seller">
@@ -71,14 +72,17 @@ export default {
 		return {
 			// #slider images
 			sliderImages: [
-				"https://api.lorem.space/image/movie?w=1140",
-				"https://api.lorem.space/image/movie?w=1139",
-				"https://api.lorem.space/image/movie?w=1138",
+				"http://127.0.0.1:5173/src/assets/imgs/banner/converse-banner.jpg",
+				"http://127.0.0.1:5173/src/assets/imgs/banner/addidas-banner.jpg",
+				"http://127.0.0.1:5173/src/assets/imgs/banner/nike-banner.jpg",
+				"http://127.0.0.1:5173/src/assets/imgs/banner/web-banner.jpg",
+				"http://127.0.0.1:5173/src/assets/imgs/banner/vans-banner.jpg",
 			],
 			loop: true,
 			slideshowDelay: 5000,
 			showNavButtons: true,
 			showIndicator: true,
+			galleryWidth: undefined,
 			// #end
 			productApi: new BaseApi("AdminProducts"),
 			products: [],
@@ -87,6 +91,10 @@ export default {
 	props: {},
 	async mounted() {
 		try {
+			let windowWidthMediaQuery = window.matchMedia("(min-width: 992px)");
+			this.setGalleryWidth(windowWidthMediaQuery); // Call listener function at run time
+			windowWidthMediaQuery.addListener(this.setGalleryWidth); // Attach listener function on state changes
+
 			const res = await this.productApi.getAll();
 			if (res.data.isSuccessful) {
 				this.products = res.data.data;
@@ -97,8 +105,19 @@ export default {
 			// notify error
 		}
 	},
-	computed: {},
-	methods: {},
+	computed: {
+		galleryWidth() {},
+	},
+	methods: {
+		setGalleryWidth(x) {
+			if (x.matches) {
+				// If media query matches
+				this.galleryWidth = undefined;
+			} else {
+				this.galleryWidth = "100vw";
+			}
+		},
+	},
 };
 </script>
 
@@ -110,6 +129,7 @@ export default {
 .nice-set {
 	.images-content {
 		display: flex;
+		flex-direction: column;
 		gap: 16px;
 		.img-parent {
 			flex: 1;
@@ -125,4 +145,18 @@ section > .title {
 	line-height: 1.2;
 	font-size: 24px;
 }
+
+.dx-gallery-item-image {
+	max-width: 100%;
+}
+
+// Responsive
+@media screen and (min-width: 768px) {
+	.nice-set {
+		.images-content {
+			flex-direction: row;
+		}
+	}
+}
+//
 </style>

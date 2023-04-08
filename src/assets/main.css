@@ -71,7 +71,7 @@ a {
 	}
 }
 
-@media (min-width: 997px) {
+@media (min-width: 992px) {
 	.breadcrumb {
 		display: block;
 	}
