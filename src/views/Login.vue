@@ -71,7 +71,6 @@ export default {
 				// Submit values to the server
 				AuthenticationApi.doLogin(this.user)
 					.then((res) => {
-						debugger;
 						if (res.data.isSuccessful) {
 							// toast
 							// redirect to user/admin default page

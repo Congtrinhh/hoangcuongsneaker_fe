@@ -1,1 +1,2 @@
 this.$refs.brandSelectBoxRef.instance.open();
+this.gridDataSource.reload(); // gọi lại hàm load

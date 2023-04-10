@@ -57,10 +57,14 @@ export default {
 
 	&.on {
 		width: 250px;
+		* {
+			visibility: visible;
+		}
 	}
 }
 
 .sidebar-items {
+	visibility: hidden;
 	padding-top: 60px;
 	.sidebar-item {
 		> a {

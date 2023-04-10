@@ -13,16 +13,6 @@
 				</DxTextBox>
 			</div>
 
-			<!-- giá -->
-			<!-- <div class="v-form-group">
-				<label for="" class="v-form-label">Giá <span class="required"></span></label>
-				<DxTextBox v-model="model.price" mode="number">
-					<DxValidator>
-						<DxRequiredRule :message="errorMessage.price.required" />
-					</DxValidator>
-				</DxTextBox>
-			</div> -->
-
 			<!-- hãng -->
 			<div class="v-form-group">
 				<label for="" class="v-form-label">Hãng</label>
@@ -47,8 +37,7 @@
 
 			<!-- trạng thái -->
 			<div class="v-form-group">
-				<label for="" class="v-form-label mr-4">Trạng thái</label>
-				<DxCheckBox v-model="model.isActive" />
+				<DxCheckBox text="Trạng thái" v-model="model.isActive" />
 			</div>
 
 			<!-- danh sách ảnh của sp (cho phép chọn 1 ảnh làm avatar) -->
@@ -73,8 +62,9 @@
 					:data-source="gridDataSource"
 					:columns="gridColumns"
 					:show-borders="true"
-					:remote-operations="editMode == modelState.update ? true : false"
 					:height="'40vh'"
+					:remote-operations="true"
+					noDataText="Không có dữ liệu"
 					@row-click="handleDataRowClicked"
 				>
 					<template #colorTemplate="{ data }">
@@ -107,23 +97,21 @@
 									:editor-options="{ items: genders, displayExpr: 'name', valueExpr: 'id' }"
 								/>
 								<DxItem
-									data-field="colorId"
+									data-field="color"
 									:label="{ text: 'Màu' }"
 									editor-type="dxSelectBox"
 									:editor-options="{
 										dataSource: colorFormDataSource,
 										displayExpr: 'name',
-										valueExpr: 'id',
 									}"
 								/>
 								<DxItem
-									data-field="sizeId"
+									data-field="size"
 									:label="{ text: 'Size' }"
 									editor-type="dxSelectBox"
 									:editor-options="{
 										dataSource: sizeFormDataSource,
 										displayExpr: 'name',
-										valueExpr: 'id',
 									}"
 								/>
 								<DxItem
@@ -178,7 +166,6 @@ import { DxTextArea } from "devextreme-vue/text-area";
 import { DxItem } from "devextreme-vue/form";
 import { Genders } from "@/constants/array/genders";
 import { ModelState } from "@/enums/model-state";
-import { RouteNameEnum } from "@/enums/route-name-enum";
 
 export default {
 	components: {
@@ -220,8 +207,118 @@ export default {
 			},
 
 			//#region Product inventory
+			initialDataSource: [], // dùng để hiện ds product inventory
+			isFirstLoadDone: false,
+
 			pagingRequest: { pageSize: 15, pageIndex: 0, productId: this.productId },
-			gridDataSource: [],
+			gridDataSource: new DataSource({
+				store: new CustomStore({
+					key: "id",
+					load: () => {
+						// trường hợp cập nhật
+						if (this.productId > 0) {
+							if (this.isFirstLoadDone == false) {
+								return AdminProductInventoryApi.getPaging(this.pagingRequest)
+									.then((res) => {
+										if (res.data.isSuccessful) {
+											this.isFirstLoadDone = true;
+
+											const resultData = res.data.data[0].items.map((productInventory) => {
+												productInventory.modelState = this.modelState.none;
+												return productInventory;
+											});
+											const data = resultData;
+											const totalCount = res.data.data[0].totalRecord;
+
+											this.initialDataSource = data; // TODO: clone deep
+
+											return {
+												data,
+												totalCount,
+											};
+										} else {
+											// toast
+											return {
+												data: [],
+												totalCount: 0,
+											};
+										}
+									})
+									.catch((err) => {
+										console.log(err);
+									});
+							} else {
+								const myPromise = new Promise((resolve, reject) => {
+									setTimeout(() => {
+										const initialVisibleDataSource = this.initialDataSource.filter(
+											(productInventory) => productInventory.modelState != this.modelState.delete
+										);
+										resolve({
+											data: initialVisibleDataSource,
+											totalCount: initialVisibleDataSource.length,
+										});
+									}, 0);
+								}).then((res) => res);
+								return myPromise;
+							}
+						}
+						// trường hợp thêm
+						else {
+							const myPromise = new Promise((resolve, reject) => {
+								setTimeout(() => {
+									const initialVisibleDataSource = this.initialDataSource.filter(
+										(productInventory) => productInventory.modelState != this.modelState.delete
+									);
+									resolve({
+										data: initialVisibleDataSource,
+										totalCount: initialVisibleDataSource.length,
+									});
+								}, 0);
+							}).then((res) => res);
+							return myPromise;
+						}
+					},
+					remove: (key) => {
+						const index = this.initialDataSource.findIndex((item) => item.id == key);
+						this.initialDataSource[index].modelState = this.modelState.delete;
+
+						this.gridDataSource.reload(); // gọi lại hàm load
+					},
+					update: (key, values) => {
+						values.productId = this.productId;
+						if (values.isActive == null) {
+							// nếu ko đụng gì đến thì auto là true
+							values.isActive = true;
+						}
+
+						const index = this.initialDataSource.findIndex((item) => item.id == key);
+						this.initialDataSource[index] = {
+							...this.initialDataSource[index],
+							...values,
+							modelState: this.modelState.update,
+							id: key,
+						};
+
+						this.gridDataSource.reload();
+
+						console.log("update: ", this.initialDataSource[index]);
+					},
+					insert: (values) => {
+						values.productId = this.productId;
+						if (values.isActive == null) {
+							// nếu ko đụng gì đến thì auto là true
+							values.isActive = true;
+						}
+
+						values.modelState = this.modelState.create;
+						values.id = new Date().getTime();
+
+						this.initialDataSource.push(values);
+						this.gridDataSource.reload();
+						console.log("initialDataSource: ", this.initialDataSource);
+					},
+				}),
+			}),
 			gridColumns: [
 				{ caption: "Tên sản phẩm con", dataType: "string", dataField: "name" },
 				{ caption: "SKU", dataType: "string", dataField: "sku" },
@@ -235,8 +332,8 @@ export default {
 				{ caption: "Giá bán", dataType: "number", dataField: "sellPrice", width: 100, format: "currency" },
 				{ caption: "Số lượng có", dataType: "number", dataField: "quantity", width: 100 },
 				{ caption: "Giới tính", cellTemplate: "genderTemplate", width: 100, dataField: "gender" },
-				{ caption: "Màu", cellTemplate: "colorTemplate", dataField: "colorId" },
-				{ caption: "Size", cellTemplate: "sizeTemplate", dataField: "sizeId" },
+				{ caption: "Màu", cellTemplate: "colorTemplate", dataField: "color" },
+				{ caption: "Size", cellTemplate: "sizeTemplate", dataField: "size" },
 				{ caption: "Trạng thái", cellTemplate: "statusTemplate", width: 120, dataField: "isActive" },
 			],
 			//#endregion
@@ -326,22 +423,38 @@ export default {
 		log(data) {
 			console.log(data);
 		},
+		generateUUIDv4() {
+			return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+				(c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+			);
+		},
 		/**
 		 * xử lý dữ liệu model trước khi gửi lên api
 		 */
 		processPayload() {
-			// this.model.brand = null
+			const finalProductInventories = this.initialDataSource.map((productInventory) => {
+				if (productInventory.modelState == this.modelState.create) delete productInventory.id;
+				return productInventory;
+			});
+			this.model.productInventories = finalProductInventories;
+			console.log({
+				finalProductInventories,
+			});
 		},
 		handleSave(e) {
-			console.log(this.model);
 			let result = e.validationGroup.validate();
 			if (result.isValid) {
 				this.processPayload();
+				console.log(this.model);
 				if (this.productId > 0) {
 					//update
 					AdminProductApi.update(this.productId, this.model)
 						.then((res) => {
 							if (res.data.isSuccessful) {
+								this.isFirstLoadDone = false;
+								this.gridDataSource.reload();
+
+								this.$showSuccess("Cập nhật thành công");
 							}
 						})
 						.catch((err) => console.log(err));
@@ -350,7 +463,9 @@ export default {
 					AdminProductApi.create(this.model)
 						.then((res) => {
 							if (res.data.isSuccessful) {
-								this.$router.push({ name: RouteNameEnum.AdminProductList });
+								this.$showSuccess("Thêm thành công");
+
+								this.$router.push({ name: this.$routeNameEnum.AdminProductList });
 							}
 						})
 						.catch((err) => console.log(err));
@@ -389,18 +504,28 @@ export default {
 		 */
 		productId(value) {
 			this.pagingRequest.productId = value;
-			if (value > 0) {
-				this.editMode = this.modelState.update;
-				this.gridDataSource = new DataSource({
-					store: new CustomStore({
-						key: "id",
-						load: (loadOptions) => {
-							if (this.productId > 0) {
+
+			this.gridDataSource = new DataSource({
+				store: new CustomStore({
+					key: "id",
+					load: () => {
+						// trường hợp cập nhật
+						if (this.productId > 0) {
+							if (this.isFirstLoadDone == false) {
 								return AdminProductInventoryApi.getPaging(this.pagingRequest)
 									.then((res) => {
 										if (res.data.isSuccessful) {
-											const data = res.data.data[0].items;
+											this.isFirstLoadDone = true;
+
+											const resultData = res.data.data[0].items.map((productInventory) => {
+												productInventory.modelState = this.modelState.none;
+												return productInventory;
+											});
+											const data = resultData;
 											const totalCount = res.data.data[0].totalRecord;
+
+											this.initialDataSource = data; // TODO: clone deep
+
 											return {
 												data,
 												totalCount,
@@ -409,7 +534,7 @@ export default {
 											// toast
 											return {
 												data: [],
-												totalItem: 0,
+												totalCount: 0,
 											};
 										}
 									})
@@ -417,81 +542,78 @@ export default {
 										console.log(err);
 									});
 							} else {
-								return new Promise(() => {
+								const myPromise = new Promise((resolve, reject) => {
 									setTimeout(() => {
-										return {
-											data: [],
-											totalCount: 0,
-										};
-									}, 1000);
-								}).then((res) => {
-									return res;
-								});
+										const initialVisibleDataSource = this.initialDataSource.filter(
+											(productInventory) => productInventory.modelState != this.modelState.delete
+										);
+										resolve({
+											data: initialVisibleDataSource,
+											totalCount: initialVisibleDataSource.length,
+										});
+									}, 0);
+								}).then((res) => res);
+								return myPromise;
 							}
-						},
-						remove: (key) => {
-							// debugger;
-							// return AdminProductInventoryApi.delete(key)
-							// 	.then((res) => {
-							// 		if (res.data.isSuccessful) {
-							// 			console.log("xoa tc");
-							// 		} else {
-							// 			// toast
-							// 			console.log("xoa tb");
-							// 		}
-							// 	})
-							// 	.catch((err) => {
-							// 		console.log(err);
-							// 	});
-							// get product inventory from model
-							// change the model state of it to delete
-							const index = this.model.productInventories.findIndex((item) => item.id == key);
-							this.model.productInventories[index].modelState = this.modelState.delete;
-						},
-						update: (key, values) => {
-							values.productId = this.productId;
-							if (values.isActive == null) {
-								// nếu ko đụng gì đến thì auto là true
-								values.isActive = true;
-							}
-							// return AdminProductInventoryApi.update(key, values)
-							// 	.then((res) => {
-							// 		if (res.data.isSuccessful) {
-							// 			console.log("update tc");
-							// 		} else {
-							// 			// toast
-							// 			console.log("update tb");
-							// 		}
-							// 	})
-							// 	.catch((err) => {
-							// 		console.log(err);
-							// 	});
-							const index = this.model.productInventories.findIndex((item) => item.id == key);
-							this.model.productInventories[index].modelState = this.modelState.update;
-						},
-						insert: (values) => {
-							values.productId = this.productId;
-							if (values.isActive == null) {
-								// nếu ko đụng gì đến thì auto là true
-								values.isActive = true;
-							}
-							// return AdminProductInventoryApi.create(values)
-							// 	.then((res) => {
-							// 		if (res.data.isSuccessful) {
-							// 			console.log("them tc");
-							// 		} else {
-							// 			// toast
-							// 			console.log("them tb");
-							// 		}
-							// 	})
-							// 	.catch((err) => {
-							// 		console.log(err);
-							// 	});
-							values.modelState = this.modelState.create;
-							this.model.productInventories.push(values);
-						},
-					}),
-				});
+						}
+						// trường hợp thêm
+						else {
+							const myPromise = new Promise((resolve, reject) => {
+								setTimeout(() => {
+									resolve({
+										data: [],
+										totalCount: 0,
+									});
+								}, 0);
+							}).then((res) => res);
+							return myPromise;
+						}
+					},
+					remove: (key) => {
+						const index = this.initialDataSource.findIndex((item) => item.id == key);
+						this.initialDataSource[index].modelState = this.modelState.delete;
+
+						this.gridDataSource.reload(); // gọi lại hàm load
+					},
+					update: (key, values) => {
+						values.productId = this.productId;
+						if (values.isActive == null) {
+							// nếu ko đụng gì đến thì auto là true
+							values.isActive = true;
+						}
+
+						const index = this.initialDataSource.findIndex((item) => item.id == key);
+						this.initialDataSource[index] = {
+							...this.initialDataSource[index],
+							...values,
+							modelState: this.modelState.update,
+							id: key,
+						};
+
+						this.gridDataSource.reload();
+
+						console.log("update: ", this.initialDataSource[index]);
+					},
+					insert: (values) => {
+						values.productId = this.productId;
+						if (values.isActive == null) {
+							// nếu ko đụng gì đến thì auto là true
+							values.isActive = true;
+						}
+
+						values.modelState = this.modelState.create;
+						values.id = new Date().getTime();
+
+						this.initialDataSource.push(values);
+						this.gridDataSource.reload();
+						console.log("initialDataSource: ", this.initialDataSource);
+					},
+				}),
+			});
+			if (value > 0) {
+				this.editMode = this.modelState.update;
+			} else {
+				this.editMode = this.modelState.create;
 			}
 		},
 	},
@@ -549,9 +671,5 @@ export default {
 		margin-top: 16px;
 		align-self: flex-start;
 	}
-}
-
-.v-form-group {
-	margin-bottom: 16px;
 }
 </style>
