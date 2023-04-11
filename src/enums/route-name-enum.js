@@ -5,4 +5,6 @@ export const RouteNameEnum = {
 	AdminOrderList: "AdminOrderList",
 	AdminUserDetail: "AdminUserDetail",
 	AdminUserList: "AdminUserList",
+	AdminInventoryDetail: "AdminInventoryDetail",
+	AdminInventoryList: "AdminInventoryList",
 };

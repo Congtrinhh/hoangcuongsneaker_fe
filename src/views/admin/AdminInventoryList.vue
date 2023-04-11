@@ -1,36 +1,29 @@
 <template>
-	<div class="" id="adminProductList">
+	<div class="" id="adminInventoryList">
 		<div class="top-utility">
-			<h1 class="header">Quản lý sản phẩm</h1>
+			<h1 class="header">Quản lý phiếu nhập</h1>
 			<dx-button text="Thêm mới" @click="handleAddNewButtonClicked"></dx-button>
 		</div>
 		<div class="main-list">
 			<dx-data-grid
 				:data-source="gridDataSource"
-				:columns="gridColumns"
 				:show-borders="true"
 				:hover-state-enabled="true"
 				:remote-operations="true"
+				:columns="gridColumns"
 				noDataText="Không có dữ liệu"
 				@row-click="handleDataRowClicked"
 			>
-				<template #productImage="{ data }">
-					<img :src="'data:image/jpeg;base64,' + data.data.images[0]?.content" :width="100" />
+				<template #supplierTemplate="{ data }">
+					{{ data.data.supplier.name }}
 				</template>
-
-				<template #statusTemplate="{ data }">
-					{{ data.data.isActive ? "Đang active" : "Ngừng active" }}
-				</template>
-
-				<!-- button delete -->
-				<dx-editing :allow-deleting="true" mode="row" />
 
 				<!-- search panel -->
 				<DxSearchPanel
 					:visible="true"
 					:highlight-case-sensitive="true"
 					:width="200"
-					placeholder="Nhập tên sản phẩm..."
+					placeholder="Nhập mã phiếu..."
 				/>
 				<!-- paging -->
 				<DxPager :allowed-page-sizes="[15, 25, 50]" :show-page-size-selector="true" />
@@ -43,7 +36,7 @@
 <script>
 import CustomStore from "devextreme/data/custom_store";
 import DataSource from "devextreme/data/data_source";
-import AdminProductApi from "@/apis/admin/admin-product-api.js";
+import AdminSupplyBillApi from "@/apis/admin/admin-supply-bill-api.js";
 import { DxDataGrid, DxEditing, DxPaging, DxPager, DxSearchPanel } from "devextreme-vue/data-grid";
 import DxButton from "devextreme-vue/button";
 
@@ -58,9 +51,9 @@ export default {
 					load: (loadOptions) => {
 						const { skip, filter } = loadOptions;
 						this.pagingRequest.pageIndex = skip / this.pagingRequest.pageSize;
-						this.pagingRequest.filterValue = filter?.filterValue; // tìm kiếm giá trị filterValue có contain trong chuỗi name của sản phẩm không(xử lý ở backend)
+						this.pagingRequest.filterValue = filter?.filterValue;
 
-						return AdminProductApi.getPaging(this.pagingRequest)
+						return AdminSupplyBillApi.getPaging(this.pagingRequest)
 							.then((res) => {
 								if (res.data.isSuccessful) {
 									const data = res.data.data[0].items;
@@ -81,39 +74,23 @@ export default {
 								this.$showError("Có lỗi xảy ra");
 							});
 					},
-					remove: (key) => {
-						return AdminProductApi.delete(key)
-							.then((res) => {
-								if (res.data.isSuccessful) {
-									this.$showSuccess("Xoá thành công");
-								} else {
-									this.$showError("Xoá thất bại");
-								}
-							})
-							.catch((err) => {
-								this.$showError("Xoá thất bại");
-							});
-					},
 				}),
 			}),
 			gridColumns: [
-				{ caption: "", cellTemplate: "productImage" },
-				{ caption: "Tên sản phẩm", dataType: "string", dataField: "name", minWidth: 300 },
-				{ caption: "Giá (vnd)", dataType: "number", dataField: "price" },
-				{ caption: "Trạng thái", dataField: "isActive", cellTemplate: "statusTemplate" },
+				{ caption: "Mã phiếu nhập", dataType: "string", dataField: "supplyCode" },
+				{ caption: "Nhà cung cấp", dataType: "string", cellTemplate: "supplierTemplate" },
+				{ caption: "Ngày nhập", dataType: "datetime", dataField: "supplyDate" },
+				{ caption: "Giá trị", dataType: "number", format: "currency", dataField: "totalPrice" },
 			],
 		};
 	},
 	props: {},
 	computed: {},
 	methods: {
-		log(data) {
-			console.log(data);
-		},
 		handleDataRowClicked(data) {
 			const id = data.data.id;
 			this.$router.push({
-				name: this.$routeNameEnum.AdminProductDetail,
+				name: this.$routeNameEnum.AdminInventoryDetail,
 				params: {
 					id: id,
 				},
@@ -122,7 +99,7 @@ export default {
 		handleAddNewButtonClicked() {
 			const id = 0;
 			this.$router.push({
-				name: this.$routeNameEnum.AdminProductDetail,
+				name: this.$routeNameEnum.AdminInventoryDetail,
 				params: {
 					id: id,
 				},
@@ -133,7 +110,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-#adminProductList {
+#adminInventoryList {
 }
 
 .action-buttons {

@@ -15,6 +15,8 @@ import AdminOrderList from "@/views/admin/AdminOrderList.vue";
 import AdminOrderDetail from "@/views/admin/AdminOrderDetail.vue";
 import AdminUserList from "@/views/admin/AdminUserList.vue";
 import AdminUserDetail from "@/views/admin/AdminUserDetail.vue";
+import AdminInventoryList from "@/views/admin/AdminInventoryList.vue";
+import AdminInventoryDetail from "@/views/admin/AdminInventoryDetail.vue";
 import { RouteNameEnum } from "@/enums/route-name-enum";
 
 const router = createRouter({
@@ -47,12 +49,12 @@ const router = createRouter({
 				{ path: "user/:id", name: RouteNameEnum.AdminUserDetail, component: AdminUserDetail },
 				{ path: "order", name: RouteNameEnum.AdminOrderList, component: AdminOrderList },
 				{ path: "order/:id", name: RouteNameEnum.AdminOrderDetail, component: AdminOrderDetail },
-				// { path: "inventory", name: "inventory management - list inventory", component: AdminInventoryList }, // manage supply product
-				// {
-				// 	path: "inventory/:id",
-				// 	name: "inventory management -  inventory detail",
-				// 	component: AdminInventoryDetail,
-				// },
+				{ path: "inventory", name: RouteNameEnum.AdminInventoryList, component: AdminInventoryList }, // manage supply product
+				{
+					path: "inventory/:id",
+					name: RouteNameEnum.AdminInventoryDetail,
+					component: AdminInventoryDetail,
+				},
 			],
 		},
 		{ path: "/checkout", name: "checkout", component: Checkout },

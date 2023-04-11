@@ -10,12 +10,12 @@
 
 			<div class="v-form-group">
 				<label for="" class="v-form-label"> Email </label>
-				<DxTextBox v-model="model.email" mode="number" :read-only="true" />
+				<DxTextBox v-model="model.email" :read-only="true" />
 			</div>
 
 			<div class="v-form-group">
 				<label for="" class="v-form-label">Số điện thoại </label>
-				<DxTextBox v-model="model.phone" mode="number" :read-only="true" />
+				<DxTextBox v-model="model.phone" :read-only="true" />
 			</div>
 
 			<!-- trạng thái -->
@@ -45,6 +45,14 @@
 
 					<!-- scrolling -->
 					<DxScrolling mode="standard" />
+
+					<!-- search panel -->
+					<DxSearchPanel
+						:visible="true"
+						:highlight-case-sensitive="true"
+						placeholder="Nhập mã đơn hàng..."
+						width="200"
+					/>
 				</dx-data-grid>
 			</div>
 		</div>
@@ -53,7 +61,6 @@
 
 <script>
 import DxSelectBox from "devextreme-vue/select-box";
-import BaseApi from "@/apis/base-api";
 import DxTextBox from "devextreme-vue/text-box";
 import AdminUserApi from "@/apis/admin/admin-user-api";
 import DxButton from "devextreme-vue/button";
@@ -71,6 +78,7 @@ import {
 	DxForm,
 	DxPaging,
 	DxPager,
+	DxSearchPanel,
 } from "devextreme-vue/data-grid";
 import { DxTextArea } from "devextreme-vue/text-area";
 import { DxItem } from "devextreme-vue/form";
@@ -97,6 +105,7 @@ export default {
 		DxTextArea,
 		DxPager,
 		DxCheckBox,
+		DxSearchPanel,
 	},
 	data() {
 		return {
@@ -192,9 +201,5 @@ export default {
 		margin-top: 16px;
 		align-self: flex-start;
 	}
-}
-
-.v-form-group {
-	margin-bottom: 16px;
 }
 </style>

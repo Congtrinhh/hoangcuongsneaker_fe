@@ -27,7 +27,7 @@ export default {
 					to: "/admin/order",
 				},
 				{
-					text: "Quản lý kho",
+					text: "Quản lý phiếu nhập",
 					to: "/admin/inventory",
 				},
 				{
@@ -68,7 +68,7 @@ export default {
 	padding-top: 60px;
 	.sidebar-item {
 		> a {
-			padding: 16px 40px 16px 40px;
+			padding: 16px 36px 16px 36px;
 			color: rgb(221, 221, 221);
 			display: block;
 			font-size: 1.1rem;

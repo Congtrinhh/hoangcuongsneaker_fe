@@ -2,17 +2,6 @@
 	<div class="" id="adminOrderList">
 		<div class="top-utility">
 			<h1 class="header">Quản lý người dùng</h1>
-			<!-- 
-			<div class="tabs-wrapper">
-				<div
-					v-for="tabItem in tabs"
-					:key="tabItem.id"
-					:class="['tab-item', { on: tabItem.id == pagingRequest.shippingStatus }]"
-					@click="handleTabClicked(tabItem)"
-				>
-					{{ tabItem.text }}
-				</div>
-			</div> -->
 		</div>
 		<div class="main-list">
 			<dx-data-grid
@@ -20,6 +9,7 @@
 				:columns="gridColumns"
 				:show-borders="true"
 				:remote-operations="true"
+				:hover-state-enabled="true"
 				noDataText="Không có dữ liệu"
 				@row-click="handleDataRowClicked"
 			>

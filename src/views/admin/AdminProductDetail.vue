@@ -63,6 +63,7 @@
 					:columns="gridColumns"
 					:show-borders="true"
 					:height="'40vh'"
+					:hover-state-enabled="true"
 					:remote-operations="true"
 					noDataText="Không có dữ liệu"
 					@row-click="handleDataRowClicked"

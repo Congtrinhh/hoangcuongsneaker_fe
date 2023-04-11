@@ -38,6 +38,20 @@ option {
 	font-weight: bold;
 	font-size: 28px;
 }
+
+/* dx - dâtgrid */
+.dx-datagrid {
+	padding: 16px;
+}
+
+.dx-datagrid .dx-row > td {
+	padding: 12px;
+}
+
+.dx-datagrid-rowsview .dx-row.dx-state-hover {
+	cursor: pointer;
+}
+
 /* util */
 .container {
 	max-width: 1140px;
@@ -66,14 +80,20 @@ a {
 	color: var(--color-text);
 }
 
+/* Admin */
 .v-form-group {
-	margin-bottom: 16px;
+	margin-bottom: 20px;
 }
 
 .v-form-label {
 	display: inline-block;
 	margin-bottom: 6px;
 }
+
+[id^="admin"][id$="List"] > .top-utility > .header {
+	margin-bottom: 24px;
+}
+/* end Admin */
 
 /* Responsive */
 

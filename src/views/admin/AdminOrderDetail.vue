@@ -27,6 +27,7 @@
 					:data-source="this.model.orderItems"
 					:columns="gridColumns"
 					:show-borders="true"
+					:hover-state-enabled="true"
 					:height="'40vh'"
 					noDataText="Không có dữ liệu"
 					@row-click="handleDataRowClicked"
