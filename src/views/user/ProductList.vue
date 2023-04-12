@@ -14,7 +14,7 @@
 						value-expr="id"
 						display-expr="text"
 						placeholder="Sắp xếp theo"
-						@valueChanged="handlePriceFilterChanged"
+						@valueChanged="handleSortChanged"
 						:element-attr="{ class: 'v-tag-box' }"
 						selectAllText="Chọn tất cả"
 						noDataText="Không có dữ liệu"
@@ -45,11 +45,11 @@
 					<div class="filter-wrapper">
 						<span class="filter-label">Hãng</span>
 						<DxTagBox
-							:data-source="colorDataSource"
+							:data-source="brandDataSource"
 							display-expr="name"
 							value-expr="id"
-							placeholder="Chọn màu"
-							@valueChanged="handleColorChanged"
+							placeholder="Chọn hãng"
+							@valueChanged="handleBrandChanged"
 							:element-attr="{ class: 'v-tag-box' }"
 							selectAllText="Chọn tất cả"
 							noDataText="Không có dữ liệu"
@@ -89,8 +89,11 @@
 			<div class="products row row-cols-xl-5">
 				<v-product v-for="product in products" :key="product.id" :item="product" class="mb-3"></v-product>
 			</div>
-			<div class="btn-load-more-wrapper">
-				<v-button v-show="products.length > 0" @click="loadMoreProducts">Xem thêm sản phẩm</v-button>
+			<div v-if="products.length > 0" class="btn-load-more-wrapper">
+				<v-button @click="loadMoreProducts">Xem thêm sản phẩm</v-button>
+			</div>
+			<div v-else class="no-data-wrapper">
+				<img src="@/assets/imgs/icons/no-data.png" alt="ảnh chú thích không có sản phẩm" />
 			</div>
 		</div>
 	</div>
@@ -102,6 +105,7 @@ import DxTagBox from "devextreme-vue/tag-box";
 import BaseApi from "@/apis/base-api";
 import CustomStore from "devextreme/data/custom_store";
 import { PriceRangeFilterEnum } from "@/enums/price-range-filter-enum";
+import { SortOptionEnum } from "@/enums/sort-option-enum";
 
 export default {
 	components: { DxSelectBox, DxTagBox },
@@ -136,13 +140,26 @@ export default {
 				pageSize: 15,
 				pageIndex: 0,
 				isActive: true,
+				gender: Number(this.$route.params.gender),
 			},
 			defaultPagingRequest: {
 				// để reset filter
 				pageSize: 15,
 				pageIndex: 0,
 				isActive: true,
+				gender: Number(this.$route.params.gender),
 			},
+
+			sortOptions: [
+				{
+					id: SortOptionEnum.priceDesc,
+					text: "Giá giảm dần",
+				},
+				{
+					id: SortOptionEnum.priceAsc,
+					text: "Giá tăng dần",
+				},
+			],
 
 			//#region Filter datasource
 			colorApi: new BaseApi("AdminColors"),
@@ -164,7 +181,7 @@ export default {
 				},
 			}),
 
-			brandApi: new BaseApi("AdminSizes"),
+			sizeApi: new BaseApi("AdminSizes"),
 			sizeDataSource: new CustomStore({
 				key: "id",
 				load: () => {
@@ -227,6 +244,10 @@ export default {
 		},
 	},
 	methods: {
+		handleSortChanged(e) {
+			const sortId = e.value;
+			this.pagingRequest.sortOption = sortId;
+		},
 		/**
 		 * reset filter
 		 */
@@ -271,6 +292,10 @@ export default {
 		async handlePriceFilterChanged(e) {
 			const priceRangeFilters = e.value;
 			this.pagingRequest.priceRangeFilters = priceRangeFilters;
+		},
+		async handleBrandChanged(e) {
+			const brandIds = e.value;
+			this.pagingRequest.brandIds = brandIds;
 		},
 	},
 	async mounted() {
@@ -354,6 +379,7 @@ export default {
 
 .btn-reset-filter {
 	text-decoration: underline;
+	cursor: pointer;
 }
 
 .btn-load-more-wrapper {
@@ -361,4 +387,49 @@ export default {
 	justify-content: center;
 	margin-top: 16px;
 }
+
+.no-data-wrapper {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+// Responsive
+@media screen and (min-width: 768px) {
+	.filters-wrapper {
+		flex-direction: row;
+		flex-wrap: wrap;
+		row-gap: 12px;
+
+		.left {
+			flex-basis: 100%;
+		}
+		.filter-wrapper {
+			flex-basis: 49%;
+		}
+	}
+
+	.sort-wrapper .v-tag-box {
+		flex: unset;
+	}
+
+	.sort-wrapper {
+		margin-bottom: 20px;
+	}
+}
+
+@media screen and (min-width: 1200px) {
+	.filters-wrapper {
+		column-gap: 24px;
+		.filter-wrapper {
+			flex: 1;
+			.filter-label {
+				display: none;
+			}
+		}
+	}
+}
+//
 </style>

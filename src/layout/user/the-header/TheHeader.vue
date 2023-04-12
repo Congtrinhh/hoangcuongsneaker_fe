@@ -39,6 +39,8 @@
 <script>
 import VCart from "@/components/user/v-cart/VCart.vue";
 import VAccountPopover from "@/components/user/v-account-popover/VAccountPopover.vue";
+import { GenderEnum } from "@/enums/gender-enum";
+
 export default {
 	components: { VCart, VAccountPopover },
 	data() {
@@ -46,15 +48,15 @@ export default {
 			navItems: [
 				{
 					text: "Nam",
-					link: "/product-list/men",
+					link: `/product-list/${GenderEnum.Male}`,
 				},
 				{
 					text: "Nữ",
-					link: "/product-list/women",
+					link: `/product-list/${GenderEnum.Female}`,
 				},
 				{
 					text: "Unisex",
-					link: "/product-list/unisex",
+					link: `/product-list/${GenderEnum.Unisex}`,
 				},
 			],
 

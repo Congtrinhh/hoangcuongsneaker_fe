@@ -63,7 +63,18 @@
 					</template>
 				</div>
 				<dx-button text="Thêm ảnh" :elementAttr="{ class: 'btn-add-image' }"></dx-button>
+				<input
+					type="file"
+					accept="image/png, image/jpeg"
+					id="productImages"
+					name="productImages"
+					multiple
+					@change="handleInputFileChanged"
+					ref="imageFiles"
+				/>
 			</div>
+
+			<output id="list"></output>
 
 			<!-- danh sách sp con của sp chính -->
 			<div class="v-form-group main-list">
@@ -177,6 +188,7 @@ import { DxTextArea } from "devextreme-vue/text-area";
 import { DxItem } from "devextreme-vue/form";
 import { Genders } from "@/constants/array/genders";
 import { ModelState } from "@/enums/model-state";
+import axios from "@/apis/axios";
 
 export default {
 	components: {
@@ -421,6 +433,8 @@ export default {
 				},
 			}),
 			//#endregion
+
+			imageFiles: null, // danh sach file ảnh gửi lên api khi tạo sản phẩm
 		};
 	},
 	props: {},
@@ -431,13 +445,12 @@ export default {
 		},
 	},
 	methods: {
-		log(data) {
-			console.log(data);
-		},
-		generateUUIDv4() {
-			return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-				(c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
-			);
+		/**
+		 * xử lý khi 1 input file chọn file mới
+		 */
+		handleInputFileChanged(e) {
+			const files = e.target.files;
+			this.imageFiles = files;
 		},
 		/**
 		 * xử lý dữ liệu model trước khi gửi lên api
@@ -474,12 +487,30 @@ export default {
 					AdminProductApi.create(this.model)
 						.then((res) => {
 							if (res.data.isSuccessful) {
-								this.$showSuccess("Thêm thành công");
-
-								this.$router.push({ name: this.$routeNameEnum.AdminProductList });
-							}
+								// goi api them anh
+								const newlyCreatedProductId = res.data.data[0].id;
+								const formData = new FormData();
+								for (var i = 0; i < this.$refs.imageFiles.files.length; i++) {
+									debugger;
+									let file = this.$refs.imageFiles.files[i];
+									formData.append("files[" + i + "]", file);
+								}
+								axios
+									.post("AdminProducts/images/" + newlyCreatedProductId, formData, {
+										headers: {
+											"Content-Type": "multipart/form-data",
+										},
+									})
+									.then((response) => {
+										if (response.data.isSuccessful) {
+											this.$showSuccess("Thêm thành công");
+											this.$router.push({ name: this.$routeNameEnum.AdminProductList });
+										} else this.$showError();
+									})
+									.catch((error) => this.$showError());
+							} else this.$showError();
 						})
-						.catch((err) => console.log(err));
+						.catch((err) => this.$showError());
 				}
 			}
 		},

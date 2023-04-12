@@ -8,6 +8,7 @@ import { registerGlobalComponents } from "./utils/global/global-components";
 import { registerGlobalFunctions } from "./utils/global/global-functions";
 
 import { RouteNameEnum } from "@/enums/route-name-enum";
+import { ModelState } from "@/enums/model-state";
 
 import "devextreme/dist/css/dx.light.css";
 import "./assets/main.css";
@@ -16,6 +17,7 @@ const app = createApp(App);
 
 // register global properties
 app.config.globalProperties.$routeNameEnum = RouteNameEnum;
+app.config.globalProperties.$modelState = ModelState;
 
 app.use(createPinia());
 app.use(router);

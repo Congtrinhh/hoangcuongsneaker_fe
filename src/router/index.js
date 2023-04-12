@@ -30,7 +30,7 @@ const router = createRouter({
 			component: TheUserLayout,
 			children: [
 				{ path: "home", name: "home page", component: Home },
-				{ path: "product-list/:type", name: "product list", component: ProductList },
+				{ path: "product-list/:gender", name: "product list", component: ProductList },
 				{ path: "product-detail/:slug", name: "product detail", component: ProductDetail },
 				{ path: "cart-detail", name: "cart detail", component: CartDetail },
 			],
