@@ -21,7 +21,12 @@
 				</div>
 				<div class="title">Hàng mới về</div>
 				<div class="products row row-cols-xl-5 my-5">
-					<v-product v-for="product in products" :key="product.id" :item="product"></v-product>
+					<v-product
+						class="mb-3"
+						v-for="product in newArrivalProducts"
+						:key="product.id"
+						:item="product"
+					></v-product>
 				</div>
 
 				<div class="button-wrapper d-flex justify-content-center"><v-button>Mua ngay</v-button></div>
@@ -30,7 +35,12 @@
 			<section class="mt-5 new-arrival">
 				<div class="title">Bán chạy nhất</div>
 				<div class="products row row-cols-xl-5 my-5">
-					<v-product v-for="product in products" :key="product.id" :item="product"></v-product>
+					<v-product
+						class="mb-3"
+						v-for="product in bestSellerProducts"
+						:key="product.id"
+						:item="product"
+					></v-product>
 				</div>
 
 				<div class="button-wrapper d-flex justify-content-center"><v-button>Mua ngay</v-button></div>
@@ -85,7 +95,8 @@ export default {
 			galleryWidth: undefined,
 			// #end
 			productApi: new BaseApi("AdminProducts"),
-			products: [],
+			newArrivalProducts: [],
+			bestSellerProducts: [],
 		};
 	},
 	props: {},
@@ -95,14 +106,29 @@ export default {
 			this.setGalleryWidth(windowWidthMediaQuery); // Call listener function at run time
 			windowWidthMediaQuery.addListener(this.setGalleryWidth); // Attach listener function on state changes
 
-			const res = await this.productApi.getAll();
-			if (res.data.isSuccessful) {
-				this.products = res.data.data;
+			const pagingRequestArrivalProducts = {
+				isHot: true, // nếu isHot = true, tức là sản phẩm này là hàng mới về
+				pageSize: 20,
+			};
+			const responseArrivalProducts = await this.productApi.getPaging(pagingRequestArrivalProducts);
+			if (responseArrivalProducts.data.isSuccessful) {
+				this.newArrivalProducts = responseArrivalProducts.data.data[0].items;
 			} else {
-				// notify error
+				this.$showError();
+			}
+
+			const pagingRequestBestSellerProducts = {
+				isBestSeller: true,
+				pageSize: 20,
+			};
+			const responseBestSellerProducts = await this.productApi.getPaging(pagingRequestBestSellerProducts);
+			if (responseBestSellerProducts.data.isSuccessful) {
+				this.bestSellerProducts = responseBestSellerProducts.data.data[0].items;
+			} else {
+				this.$showError();
 			}
 		} catch (error) {
-			// notify error
+			this.$showError();
 		}
 	},
 	computed: {

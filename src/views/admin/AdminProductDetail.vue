@@ -37,7 +37,17 @@
 
 			<!-- trạng thái -->
 			<div class="v-form-group">
-				<DxCheckBox text="Trạng thái" v-model="model.isActive" />
+				<DxCheckBox text="Trạng thái active" v-model="model.isActive" />
+			</div>
+
+			<!-- Là sản phẩm mới về -->
+			<div class="v-form-group">
+				<DxCheckBox text="Là sản phẩm mới về" v-model="model.isHot" />
+			</div>
+
+			<!-- là sản phẩm bán chạy -->
+			<div class="v-form-group">
+				<DxCheckBox text="Là sản phẩm bán chạy" v-model="model.isBestSeller" />
 			</div>
 
 			<!-- danh sách ảnh của sp (cho phép chọn 1 ảnh làm avatar) -->

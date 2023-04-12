@@ -3,7 +3,7 @@
 		<div class="cart-quantity">{{ items?.length }}</div>
 		<img class="cart-icon" src="@/assets/imgs/icons/shopping-cart.png" />
 		<dx-popover
-			:width="420"
+			:width="popoverWidth"
 			:visible="cartStore.hasOpenCart"
 			:target="target"
 			:position="position"
@@ -70,6 +70,7 @@ export default {
 			items: [],
 			// isVisible: false,
 			cartStore: useCartStore(),
+			popoverWidth: 420,
 		};
 	},
 	props: {
@@ -89,9 +90,6 @@ export default {
 			type: String,
 			default: "giỏ hàng",
 		},
-	},
-	mounted() {
-		this.items = CartApi.getCart();
 	},
 	computed: {
 		totalPrice() {
@@ -115,6 +113,13 @@ export default {
 		},
 	},
 	methods: {
+		setPopoverWidth(x) {
+			if (x.matches) {
+				this.popoverWidth = 320;
+			} else {
+				this.popoverWidth = 420;
+			}
+		},
 		handlePopoverHiding() {
 			this.cartStore.hasOpenCart = false;
 		},
@@ -146,6 +151,13 @@ export default {
 		hideCartComponent() {
 			this.cartStore.hasOpenCart = false;
 		},
+	},
+	mounted() {
+		let windowWidthMediaQuery = window.matchMedia("(max-width: 420px)");
+		this.setPopoverWidth(windowWidthMediaQuery); // Call listener function at run time
+		windowWidthMediaQuery.addListener(this.setPopoverWidth); // Attach listener function on state changes
+
+		this.items = CartApi.getCart();
 	},
 };
 </script>
