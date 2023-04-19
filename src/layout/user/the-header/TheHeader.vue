@@ -4,12 +4,15 @@
 			<!-- navigation for mobile -->
 			<div :class="['nav-mobile-wrapper', { on: isVisibleSideBar }]">
 				<div class="toggle-icon-wrapper img-parent" @click="toggleSizeBar">
-					<i :class="isVisibleSideBar ? 'fa-sharp fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
+					<font-awesome-icon v-show="isVisibleSideBar == false" :icon="['fas', 'bars']" size="lg" />
+					<font-awesome-icon v-show="isVisibleSideBar == true" :icon="['fas', 'xmark']" size="lg" />
 				</div>
 				<ul class="nav">
 					<router-link @click="closeSideBar" class="go-to-home-page" to="/">Trang chủ</router-link>
 					<li v-for="item in navItems" :key="item.text" class="nav-item">
-						<router-link @click="closeSideBar" :to="item.link">{{ item.text }}</router-link>
+						<router-link @click="handleCategoryClicked(item.category)" :to="item.link">{{
+							item.text
+						}}</router-link>
 					</li>
 				</ul>
 			</div>
@@ -40,6 +43,7 @@
 import VCart from "@/components/user/v-cart/VCart.vue";
 import VAccountPopover from "@/components/user/v-account-popover/VAccountPopover.vue";
 import { GenderEnum } from "@/enums/gender-enum";
+import { useIndexStore } from "@/stores";
 
 export default {
 	components: { VCart, VAccountPopover },
@@ -49,14 +53,17 @@ export default {
 				{
 					text: "Nam",
 					link: `/product-list/${GenderEnum.Male}`,
+					category: GenderEnum.Male,
 				},
 				{
 					text: "Nữ",
 					link: `/product-list/${GenderEnum.Female}`,
+					category: GenderEnum.Female,
 				},
 				{
 					text: "Unisex",
 					link: `/product-list/${GenderEnum.Unisex}`,
+					category: GenderEnum.Unisex,
 				},
 			],
 
@@ -73,6 +80,10 @@ export default {
 		},
 		closeSideBar() {
 			this.isVisibleSideBar = false;
+		},
+		handleCategoryClicked(category) {
+			useIndexStore.category = category;
+			this.closeSideBar();
 		},
 	},
 };
@@ -101,12 +112,17 @@ export default {
 	gap: 60px;
 
 	display: none;
+
+	.nav-item a {
+		font-size: 16px;
+		font-weight: 500;
+	}
 }
 .icons-wrapper {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	gap: 10px;
+	gap: 16px;
 }
 .account-wrapper {
 	cursor: pointer;
@@ -186,14 +202,16 @@ export default {
 	}
 
 	.toggle-icon-wrapper {
-		display: inline-block;
 		position: absolute;
 		top: 6px;
 		z-index: 1;
 		width: 40px;
 		height: 40px;
-		background: #333;
+		background: #fff;
 		left: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 }
 
@@ -215,6 +233,11 @@ export default {
 //
 
 // Responsive
+@media screen and (min-width: 768px) {
+	.icons-wrapper {
+		gap: 20px;
+	}
+}
 @media screen and (min-width: 992px) {
 	.v-search-box-input {
 		display: block;
@@ -229,15 +252,9 @@ export default {
 		padding: 6px 0;
 	}
 
-	.icons-wrapper {
-		gap: 60px;
-	}
-
 	.nav-wrapper {
 		display: flex;
 		margin-right: auto;
-		.nav-item {
-		}
 	}
 
 	.nav-mobile-wrapper {

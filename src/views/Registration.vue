@@ -12,14 +12,11 @@
 								:pattern="rule.userName.minLength"
 								:message="errorMessage.userName.minLength"
 							/>
-							<!-- <DxAsyncRule
-								:validation-callback="validateUserNameAsync"
-								message="Tên tài khoản đã tồn tại"
-							/> -->
 						</DxValidator>
 					</DxTextBox>
 				</div>
 
+				<!-- mật khẩu -->
 				<div class="v-form-group mt-3">
 					<label for="" class="v-form-label">Mật khẩu <span class="required"></span></label>
 					<DxTextBox placeholder="Nhập mật khẩu" v-model="model.password" mode="password">
@@ -33,12 +30,26 @@
 					</DxTextBox>
 				</div>
 
+				<!-- nhập lại mật khẩu -->
+				<div class="v-form-group mt-3">
+					<label for="" class="v-form-label">Nhập lại mật khẩu <span class="required"></span></label>
+					<DxTextBox placeholder="Nhập mật khẩu" v-model="model.passwordConfirm" mode="password">
+						<DxValidator>
+							<DxRequiredRule :message="errorMessage.passwordConfirm.required" />
+							<DxCustomRule
+								:message="errorMessage.passwordConfirm.match"
+								:reevaluate="false"
+								:validationCallback="validatePasswordConfirm"
+							/>
+						</DxValidator>
+					</DxTextBox>
+				</div>
+
 				<div class="v-form-group mt-3">
 					<label for="" class="v-form-label">Email</label>
 					<DxTextBox>
 						<DxValidator>
 							<DxEmailRule :message="errorMessage.email.email" />
-							<!-- <DxAsyncRule :validation-callback="validateEmailAsync" message="Email đã tồn tại" /> -->
 						</DxValidator>
 					</DxTextBox>
 				</div>
@@ -57,10 +68,11 @@
 				</div>
 
 				<div class="more-action-wrapper mt-4">
+					<router-link to="/"><u>Trang chủ</u></router-link>
 					<div class="">
 						Bạn đã có tài khoản?
 
-						<router-link to="/login">Đăng nhập</router-link>
+						<router-link to="/login"><u>Đăng nhập</u></router-link>
 					</div>
 				</div>
 			</DxValidationGroup>
@@ -70,7 +82,13 @@
 
 <script>
 import DxTextBox from "devextreme-vue/text-box";
-import DxValidator, { DxAsyncRule, DxRequiredRule, DxEmailRule, DxPatternRule } from "devextreme-vue/validator";
+import DxValidator, {
+	DxAsyncRule,
+	DxRequiredRule,
+	DxEmailRule,
+	DxPatternRule,
+	DxCustomRule,
+} from "devextreme-vue/validator";
 import AuthenticationApi from "@/apis/authentication-api";
 import DxValidationGroup from "devextreme-vue/validation-group";
 import DxButton from "devextreme-vue/button";
@@ -85,6 +103,7 @@ export default {
 		DxEmailRule,
 		DxButton,
 		DxAsyncRule,
+		DxCustomRule,
 	},
 	data() {
 		return {
@@ -99,6 +118,10 @@ export default {
 				password: {
 					required: "Vui lòng nhập mật khẩu",
 					minLength: "Mật khẩu cần tối thiếu 8 ký tự",
+				},
+				passwordConfirm: {
+					required: "Vui lòng nhập xác nhân mật khẩu",
+					match: "Mật khẩu xác nhận không khớp với mật khẩu",
 				},
 				email: {
 					email: "Email chưa đúng định dạng",
@@ -117,19 +140,23 @@ export default {
 				password: {
 					minLength: /^.{8,}$/,
 				},
+				passwordConfirm: {
+					// match: "Vui lòng nhập xác nhân mật khẩu",
+				},
 			},
 
 			//#endregion
 		};
 	},
-	props: {
-		pColor: {
-			type: String,
-			default: "black",
-		},
-	},
+	props: {},
 	computed: {},
 	methods: {
+		validatePasswordConfirm(e) {
+			const passwordConfirm = e.value;
+			const password = this.model.password;
+			if (passwordConfirm === password) return true;
+			return false;
+		},
 		/**
 		 * xử lý sự kiện đăng ký tài khoản
 		 */
@@ -137,25 +164,25 @@ export default {
 			let result = e.validationGroup.validate();
 			if (result.isValid) {
 				// Submit values to the server
-				AuthenticationApi.doRegistration(this.user)
+				AuthenticationApi.doRegistration(this.model)
 					.then((res) => {
-						debugger;
 						if (res.data.isSuccessful) {
-							// toast
-							// redirect to user/admin default page
+							this.$router.push({
+								name: this.$routeNameEnum.Login,
+							});
+							this.$showSuccess("Đăng ký thành công");
+						} else {
+							const errorMessage = res.data.errorMessage;
+							this.$showError(errorMessage);
 						}
 					})
 					.catch((err) => {
-						// toast
+						this.$showError("Đăng ký thất bại");
 					});
 			}
 		},
-		validateUserNameAsync(params) {
-			debugger;
-		},
-		validateEmailAsync(params) {
-			debugger;
-		},
+		validateUserNameAsync(params) {},
+		validateEmailAsync(params) {},
 	},
 };
 </script>
@@ -180,6 +207,9 @@ export default {
 }
 
 .more-action-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	> div {
 		text-align: right;
 	}

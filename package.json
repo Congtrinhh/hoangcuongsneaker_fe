@@ -18,9 +18,9 @@
     "bootstrap": "^5.2.3",
     "devextreme": "22.2.4",
     "devextreme-vue": "22.2.4",
+    "font-awesome": "^4.7.0",
     "pinia": "^2.0.28",
     "tiny-emitter": "^2.1.0",
-    "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {

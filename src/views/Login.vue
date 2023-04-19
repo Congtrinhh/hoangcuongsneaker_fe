@@ -24,15 +24,15 @@
 				</div>
 
 				<div class="btn-wrapper">
-					<!-- <v-button class="mt-4" :hover-effect="false" @click="handleLogin">Đăng nhập</v-button> -->
 					<dx-button :element-attr="{ class: 'mt-4' }" text="Đăng nhập" @click="handleLogin" />
 				</div>
 
 				<div class="more-action-wrapper mt-4">
+					<router-link to="/"><u>Trang chủ</u></router-link>
 					<div class="">
 						Bạn chưa có tài khoản?
 
-						<router-link to="/registration">Đăng ký</router-link>
+						<router-link to="/registration"><u>Đăng ký</u></router-link>
 					</div>
 				</div>
 			</DxValidationGroup>
@@ -46,6 +46,7 @@ import DxValidator, { DxRequiredRule, DxPatternRule } from "devextreme-vue/valid
 import AuthenticationApi from "@/apis/authentication-api";
 import DxValidationGroup from "devextreme-vue/validation-group";
 import DxButton from "devextreme-vue/button";
+import { useIndexStore } from "@/stores";
 
 export default {
 	components: { DxTextBox, DxValidator, DxRequiredRule, DxPatternRule, DxValidationGroup, DxButton },
@@ -54,12 +55,7 @@ export default {
 			model: {}, // chứa thông tin đăng nhập: user name, password
 		};
 	},
-	props: {
-		pColor: {
-			type: String,
-			default: "black",
-		},
-	},
+	props: {},
 	computed: {},
 	methods: {
 		/**
@@ -69,15 +65,36 @@ export default {
 			let result = e.validationGroup.validate();
 			if (result.isValid) {
 				// Submit values to the server
-				AuthenticationApi.doLogin(this.user)
+				AuthenticationApi.doLogin(this.model)
 					.then((res) => {
 						if (res.data.isSuccessful) {
-							// toast
-							// redirect to user/admin default page
+							const jwtToken = res.data.data[0];
+							const user = res.data.data[1];
+
+							localStorage.setItem("jwtToken", jwtToken); // lưu token vào localStorage
+							localStorage.setItem("userInfo", JSON.stringify(user)); // lưu thong tin usesr vào localStorage
+
+							useIndexStore.isLoggedIn = true;
+							useIndexStore.userInfo = user;
+
+							this.$showSuccess("Đăng nhập thành công");
+
+							if (user.role == "admin") {
+								this.$router.push({
+									name: this.$routeNameEnum.AdminDashBoard,
+								});
+							} else {
+								this.$router.push({
+									name: this.$routeNameEnum.Home,
+								});
+							}
+						} else {
+							const errorMessage = res.data.errorMessage;
+							this.$showError(errorMessage);
 						}
 					})
 					.catch((err) => {
-						// toast
+						this.$showError("Đăng nhập thất bại");
 					});
 			}
 		},
@@ -105,6 +122,9 @@ export default {
 }
 
 .more-action-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	> div {
 		text-align: right;
 	}

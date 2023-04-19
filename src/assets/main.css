@@ -29,6 +29,18 @@ option {
 	font-family: "Quicksand", sans-serif;
 }
 
+/* reset bootstrap styles */
+ol,
+ul,
+dl {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+ol,
+ul {
+	padding-left: 0;
+}
+
 /* reset dexextreme styles */
 .dx-theme-generic-typography a {
 	color: unset;
@@ -66,12 +78,10 @@ option {
 	height: 100%;
 }
 
-.breadcrumb {
-	margin-top: -1px;
-	background: transparent;
-	margin-bottom: 20px;
-	padding: 0 0px;
-	display: none;
+.error {
+	color: red;
+	font-weight: 500;
+	margin: 6px 0;
 }
 
 a {
@@ -93,17 +103,26 @@ a {
 [id^="admin"][id$="List"] > .top-utility > .header {
 	margin-bottom: 24px;
 }
+
+[id^="admin"][id$="List"] .button-action,
+[id^="admin"][id$="Detail"] .button-action {
+	cursor: pointer;
+	margin: 0 12px;
+	border-radius: 4px;
+	padding: 6px;
+}
+
+[id^="admin"][id$="List"] .button-action:hover,
+[id^="admin"][id$="Detail"] .button-action:hover {
+	color: #fff;
+	background: #333;
+}
+
 /* end Admin */
 
 /* Responsive */
 
 @media (hover: hover) {
 	a:hover {
-	}
-}
-
-@media (min-width: 992px) {
-	.breadcrumb {
-		display: block;
 	}
 }

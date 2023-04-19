@@ -3,7 +3,7 @@
 		<div class="left">
 			<div class="logo-wrapper">Hoangcuongsneaker</div>
 			<div class="toggle-wrapper" @click="toggleSizeBar">
-				<i :class="isVisibleSideBar ? 'fa-sharp fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
+				<font-awesome-icon :icon="['fas', 'bars']" size="lg" />
 			</div>
 		</div>
 		<v-account-popover></v-account-popover>
@@ -59,5 +59,9 @@ export default {
 .collapse-wrapper {
 }
 .account-wrapper {
+}
+
+svg[class*="fa"] {
+	cursor: pointer;
 }
 </style>

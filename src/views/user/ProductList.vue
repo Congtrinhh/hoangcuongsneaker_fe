@@ -1,14 +1,16 @@
 <template>
 	<div id="productListComponent">
 		<div class="container">
-			<div class="breadcrumb">
-				<span>Trang chủ</span>
-				/
-				<span>Nam</span>
-			</div>
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><router-link to="/home">Trang chủ</router-link></li>
+					<li class="breadcrumb-item"><a href="#">Sản phẩm</a></li>
+				</ol>
+			</nav>
+
 			<div class="filter-and-sort">
 				<div class="sort-wrapper">
-					<div class="title">Giày nam</div>
+					<div class="title">{{ title }}</div>
 					<DxSelectBox
 						:items="sortOptions"
 						value-expr="id"
@@ -89,7 +91,7 @@
 			<div class="products row row-cols-xl-5">
 				<v-product v-for="product in products" :key="product.id" :item="product" class="mb-3"></v-product>
 			</div>
-			<div v-if="products.length > 0" class="btn-load-more-wrapper">
+			<div v-if="isVisibleLoadMoreProductButton" class="btn-load-more-wrapper">
 				<v-button @click="loadMoreProducts">Xem thêm sản phẩm</v-button>
 			</div>
 			<div v-else class="no-data-wrapper">
@@ -106,6 +108,8 @@ import BaseApi from "@/apis/base-api";
 import CustomStore from "devextreme/data/custom_store";
 import { PriceRangeFilterEnum } from "@/enums/price-range-filter-enum";
 import { SortOptionEnum } from "@/enums/sort-option-enum";
+import { GenderEnum } from "@/enums/gender-enum";
+import { useIndexStore } from "@/stores";
 
 export default {
 	components: { DxSelectBox, DxTagBox },
@@ -140,14 +144,14 @@ export default {
 				pageSize: 15,
 				pageIndex: 0,
 				isActive: true,
-				gender: Number(this.$route.params.gender),
+				// gender: Number(this.$route.params.gender),
 			},
 			defaultPagingRequest: {
 				// để reset filter
 				pageSize: 15,
 				pageIndex: 0,
 				isActive: true,
-				gender: Number(this.$route.params.gender),
+				// gender: Number(this.$route.params.gender),
 			},
 
 			sortOptions: [
@@ -219,26 +223,41 @@ export default {
 				},
 			}),
 			//#endregion
+			gender: 0,
+			indexStore: useIndexStore,
+			isLastPage: false,
 		};
 	},
-	props: {
-		pColor: {
-			type: String,
-			default: "black",
+	props: {},
+	computed: {
+		title() {
+			if (this.gender == GenderEnum.Male) {
+				return "Đồ nam";
+			} else if (this.gender == GenderEnum.Female) {
+				return "Đồ nữ";
+			} else if (this.gender == GenderEnum.Unisex) {
+				return "Đồ unisex";
+			} else {
+				return "Đồ nam/ nữ/ unisex";
+			}
+		},
+		isVisibleLoadMoreProductButton() {
+			if (this.product?.length == 0) return false;
+			if (this.isLastPage == true) return false;
+			return true;
 		},
 	},
-	computed: {},
 	watch: {
 		/**
 		 * Mỗi khi paging request thay đổi, gọi lại hàm lấy danh sách sản phẩm theo paging request mới
 		 */
 		pagingRequest: {
-			async handler(pagingRequest, oldPagingRequest) {
+			handler(currentPagingRequest, oldPagingRequest) {
 				const oldPageIndex = oldPagingRequest.pageIndex,
-					pageIndex = pagingRequest.pageIndex;
+					pageIndex = currentPagingRequest.pageIndex;
 				// trường hợp load thêm dữ liệu
-				if (oldPageIndex != pageIndex) await this.getProducts(true);
-				else await this.getProducts();
+				if (oldPageIndex != pageIndex) this.getProducts(true);
+				else this.getProducts();
 			},
 			deep: true,
 		},
@@ -264,55 +283,67 @@ export default {
 		 * load thêm sản phẩm
 		 */
 		loadMoreProducts() {
-			this.pagingRequest.pageIndex = this.pagingRequest.pageIndex + 1;
+			let mainPageIndex = this.mainPageIndex;
+			this.mainPageIndex = mainPageIndex ? mainPageIndex + 1 : 1;
+			this.getProducts(true);
 		},
 		/**
 		 * load danh sách sản phẩm
 		 */
-		async getProducts(hasAppendMore) {
-			try {
-				const res = await this.productApi.getPaging(this.pagingRequest);
-				if (res.data.isSuccessful) {
-					const items = res.data.data[0].items;
-					if (hasAppendMore == true) this.products = [...this.products, ...items];
-					else this.products = items;
-				} else this.$showError();
-			} catch (error) {
-				this.$showError();
-			}
+		getProducts(hasAppendMore) {
+			let pagingRequest = this.pagingRequest;
+			if (this.mainPageIndex)
+				pagingRequest = {
+					...this.pagingRequest,
+					pageIndex: this.mainPageIndex,
+				};
+			this.productApi
+				.getPaging(pagingRequest)
+				.then((res) => {
+					if (res.data.isSuccessful) {
+						const items = res.data.data[0].items;
+						const totalCount = res.data.data[0].totalRecord;
+						if (items.length == totalCount) this.isLastPage = true;
+						if (hasAppendMore == true) this.products = [...this.products, ...items];
+						else this.products = items;
+					} else this.$showError();
+				})
+				.catch((error) => this.$showError());
 		},
-		async handleColorChanged(e) {
+		handleColorChanged(e) {
 			const colorIds = e.value;
 			this.pagingRequest.colorIds = colorIds;
 		},
-		async handleSizeChanged(e) {
+		handleSizeChanged(e) {
 			const sizeIds = e.value;
 			this.pagingRequest.sizeIds = sizeIds;
 		},
-		async handlePriceFilterChanged(e) {
+		handlePriceFilterChanged(e) {
 			const priceRangeFilters = e.value;
 			this.pagingRequest.priceRangeFilters = priceRangeFilters;
 		},
-		async handleBrandChanged(e) {
+		handleBrandChanged(e) {
 			const brandIds = e.value;
 			this.pagingRequest.brandIds = brandIds;
 		},
 	},
-	async mounted() {
-		await this.getProducts();
+	mounted() {
+		this.gender = this.$route.params.gender;
+		if (this.gender && Number(this.gender) > 0) {
+			this.defaultPagingRequest.gender = Number(this.gender);
+			this.pagingRequest.gender = Number(this.gender);
+		} else {
+			this.defaultPagingRequest.gender = null;
+			this.pagingRequest.gender = null;
+		}
 	},
 };
 </script>
 
 <style scoped lang="scss">
-.breadcrumb {
-	margin: 10px 0;
-	font-size: 0.9px;
-}
-
 #productListComponent {
 	background: var(--color-main-content-background);
-	padding-top: 16px;
+	padding: 16px 0 30px;
 }
 
 .filter-and-sort {

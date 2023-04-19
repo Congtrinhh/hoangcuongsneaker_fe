@@ -1,8 +1,15 @@
 import axios from "axios";
+
+// get jwt token
+const jwtToken = localStorage.getItem("jwtToken");
+
 // Next we make an 'instance' of it
 const instance = axios.create({
 	// .. where we make our configurations
 	baseURL: "http://localhost:5095/api/",
+	headers: {
+		Authorization: `bearer ${jwtToken}`,
+	},
 });
 
 // Where you would set stuff like your 'Authorization' header, etc ...

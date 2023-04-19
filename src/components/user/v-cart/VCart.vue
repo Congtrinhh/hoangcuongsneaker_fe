@@ -38,7 +38,7 @@
 								<span>{{ cartItem.quantity }}</span>
 								<button @click="increaseQuantity(cartItem)" class="v-button-icon">+</button>
 							</div>
-							<div class="price">{{ getTotalPriceItem(cartItem) }}</div>
+							<div class="price">{{ getCurrencyFormat(getTotalPriceItem(cartItem)) }}</div>
 						</div>
 					</div>
 				</div>
@@ -47,7 +47,7 @@
 				<div class="cart-summary">
 					<div class="summary-detail">
 						<div class="summary-text">Tổng tiền</div>
-						<div class="summary-price">{{ totalPrice }}</div>
+						<div class="summary-price">{{ getCurrencyFormat(totalPrice) }}</div>
 					</div>
 					<router-link class="btn-view-cart-detail" to="/cart-detail" @click="hideCartComponent">
 						<v-button class="w-full">XEM GIỎ HÀNG</v-button>
@@ -62,6 +62,7 @@
 import { DxPopover } from "devextreme-vue/popover";
 import CartApi from "@/apis/user/cart-api";
 import { useCartStore } from "@/stores/cart";
+import { getCurrencyFormat } from "@/helpers/common-helpers";
 
 export default {
 	components: { DxPopover },
@@ -71,6 +72,7 @@ export default {
 			// isVisible: false,
 			cartStore: useCartStore(),
 			popoverWidth: 420,
+			getCurrencyFormat,
 		};
 	},
 	props: {
@@ -273,11 +275,17 @@ export default {
 	}
 }
 
-.v-button-icon {
-	cursor: pointer;
-}
-
 .btn-view-cart-detail {
 	// display: block;
+}
+
+.v-button-icon {
+	cursor: pointer;
+	border-radius: 4px;
+	border: 1px solid #333;
+	background: #fff;
+	min-width: 24px;
+	color: #333;
+	font-weight: 500;
 }
 </style>

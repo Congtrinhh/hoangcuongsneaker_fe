@@ -11,18 +11,19 @@
 			<div class="product-detail">
 				<div class="product-detail-brand">{{ item?.brand?.name }}</div>
 				<div class="product-detail-name">{{ item?.name }}</div>
-				<div class="product-detail-price">{{ item?.price || 0 }}</div>
+				<div class="product-detail-price">{{ getCurrencyFormat(item?.price) }}</div>
 			</div>
 		</router-link>
 	</div>
 </template>
 
 <script>
+import { getCurrencyFormat } from "@/helpers/common-helpers";
 export default {
 	components: {},
 	data() {
 		return {
-			color: "green",
+			getCurrencyFormat,
 		};
 	},
 	props: {
@@ -60,16 +61,16 @@ export default {
 			padding: 8px;
 			.product-detail-brand {
 				text-transform: uppercase;
-				font-size: 0.9rem;
+				font-size: 0.8rem;
 			}
 			.product-detail-name {
+				font-weight: 500;
+				margin-top: 6px;
 			}
 			.product-detail-price {
 				margin-top: 40px;
 				font-weight: bold;
-				&::after {
-					content: "d";
-				}
+				margin-bottom: 6px;
 			}
 		}
 	}

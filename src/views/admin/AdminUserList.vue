@@ -81,7 +81,12 @@ export default {
 								}
 							})
 							.catch((err) => {
-								this.$showError("Có lỗi xảy ra");
+								let errorMessage = "Có lỗi xảy ra";
+								if (err.response.status == 401)
+									errorMessage = "Bạn không có quyền thực hiện chức năng này";
+								else if (err.response.status == 403)
+									errorMessage = "Bạn không có quyền thực hiện chức năng này";
+								this.$showError(errorMessage);
 							});
 					},
 				}),
@@ -92,7 +97,7 @@ export default {
 				{ caption: "Điện thoại", dataType: "string", dataField: "phone" },
 				{ caption: "Số đơn hàng đã đặt", cellTemplate: "orderQuantityTemplate" },
 				{ caption: "Trạng thái", dataField: "isActive", cellTemplate: "statusTemplate" },
-				{ caption: "Ngày tạo tài khoản", dataType: "date", dataField: "createdAt" },
+				{ caption: "Ngày tạo tài khoản", dataType: "date", dataField: "createdAt", format: "dd/MM/yyyy HH:mm" },
 				{ caption: "", fixed: true, fixedPosition: "right", cellTemplate: "buttonsActionTemplate" },
 			],
 

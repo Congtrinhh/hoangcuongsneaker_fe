@@ -2,10 +2,16 @@
 	<div id="cartDetailComponent">
 		<div class="container">
 			<!-- breadcrumb -->
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><router-link to="/home">Trang chủ</router-link></li>
+					<li class="breadcrumb-item"><a href="#">Chi tiết giỏ hàng</a></li>
+				</ol>
+			</nav>
 
 			<!-- main content -->
 			<div class="row cart-main-content">
-				<div class="col col-lg-8">
+				<div class="col col-12 col-lg-8">
 					<div class="cart-info-wrapper">
 						<div class="title">Giỏ hàng của bạn</div>
 						<span class="note">Bạn đang có {{ items?.length }} <b>sản phẩm</b> trong giỏ hàng</span>
@@ -18,7 +24,7 @@
 								<div class="detail">
 									<div class="name-and-button">
 										<div class="name">{{ cartItem.name }}</div>
-										<button @click="deleteItem" class="v-button-icon">&times;</button>
+										<button @click="deleteItem(cartItem)" class="v-button-icon">&times;</button>
 									</div>
 									<div class="color-and-size">
 										<span>{{ cartItem.color?.name }}</span>
@@ -37,7 +43,7 @@
 											<span>{{ cartItem.quantity }}</span>
 											<button @click="increaseQuantity(cartItem)" class="v-button-icon">+</button>
 										</div>
-										<div class="price">{{ getTotalPriceItem(cartItem) }}</div>
+										<div class="price">{{ getCurrencyFormat(getTotalPriceItem(cartItem)) }}</div>
 									</div>
 								</div>
 							</div>
@@ -45,7 +51,7 @@
 						<!-- end list items -->
 					</div>
 				</div>
-				<div class="col col-lg-4">
+				<div class="col col-12 col-lg-4 mt-3 mt-lg-0">
 					<div class="order-info-wrapper">
 						<div class="title">Thông tin đơn hàng</div>
 
@@ -53,7 +59,7 @@
 						<div class="order-summary">
 							<div class="order-detail">
 								<div class="order-text">Tổng tiền</div>
-								<div class="order-price">{{ totalPrice }}</div>
+								<div class="order-price">{{ getCurrencyFormat(totalPrice) }}</div>
 							</div>
 						</div>
 						<!-- end summary -->
@@ -63,9 +69,9 @@
 							<li>Bạn cũng có thể nhập mã giảm giá ở trang thanh toán.</li>
 						</ul>
 
-						<router-link class="d-block" to="/checkout">
-							<v-button class="w-full">Thanh toán</v-button>
-						</router-link>
+						<v-button class="w-full" v-if="items.length > 0" @click="handleCheckoutButtonClicked"
+							>Thanh toán</v-button
+						>
 					</div>
 				</div>
 			</div>
@@ -76,6 +82,8 @@
 <script>
 import CartApi from "@/apis/user/cart-api";
 import { useCartStore } from "@/stores/cart";
+import { getCurrencyFormat } from "@/helpers/common-helpers";
+import { useIndexStore } from "@/stores";
 
 export default {
 	components: {},
@@ -83,6 +91,7 @@ export default {
 		return {
 			items: [],
 			cartStore: useCartStore(),
+			getCurrencyFormat,
 		};
 	},
 	props: {},
@@ -107,6 +116,17 @@ export default {
 		},
 	},
 	methods: {
+		/**
+		 * chuyển hướng đến trang đăng nhập nếu người dùng chưa đăng nhập
+		 * chuyển hướng đến trang thanh toán nếu ng dùng dã đăng nhập
+		 */
+		handleCheckoutButtonClicked() {
+			if (useIndexStore.isLoggedIn == true) {
+				this.$router.push({ name: this.$routeNameEnum.Checkout });
+			} else {
+				this.$router.push({ name: this.$routeNameEnum.Login });
+			}
+		},
 		deleteItem(itemToDelete) {
 			// save items info after every single update
 			const index = this.items.findIndex((item) => item.id == itemToDelete.id);
@@ -176,7 +196,7 @@ export default {
 
 	.img-wrapper {
 		width: 80px;
-		border: 1px solid;
+		border: 1px solid #ddd;
 	}
 }
 
@@ -253,11 +273,18 @@ export default {
 
 .v-button-icon {
 	cursor: pointer;
+	border-radius: 4px;
+	border: 1px solid #333;
+	background: #fff;
+	min-width: 24px;
+	color: #333;
+	font-weight: 500;
 }
 
 //
 #cartDetailComponent {
 	background: var(--color-main-content-background);
+	padding: 16px 0 30px;
 }
 .cart-main-content {
 }
@@ -298,7 +325,7 @@ export default {
 
 .cart-item-wrapper {
 	padding: 16px 16px 16px 16px;
-	border: 1px solid var(--color-input-border);
+	border: 1px dashed var(--color-input-border);
 	border-radius: 8px;
 	margin: 0 16px;
 }

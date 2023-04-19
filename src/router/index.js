@@ -6,6 +6,7 @@ import ProductList from "@/views/user/ProductList.vue";
 import ProductDetail from "@/views/user/ProductDetail.vue";
 import CartDetail from "@/views/user/CartDetail.vue";
 import Checkout from "@/views/user/Checkout.vue";
+import UserAccount from "@/views/user/UserAccount.vue";
 import Login from "@/views/Login.vue";
 import Registration from "@/views/Registration.vue";
 import DashBoard from "@/views/admin/DashBoard.vue";
@@ -26,23 +27,24 @@ const router = createRouter({
 		{
 			path: "/",
 			redirect: "/home",
-			name: "user root path",
+			name: RouteNameEnum.UserRootPage,
 			component: TheUserLayout,
 			children: [
-				{ path: "home", name: "home page", component: Home },
-				{ path: "product-list/:gender", name: "product list", component: ProductList },
-				{ path: "product-detail/:slug", name: "product detail", component: ProductDetail },
-				{ path: "cart-detail", name: "cart detail", component: CartDetail },
+				{ path: "home", name: RouteNameEnum.Home, component: Home },
+				{ path: "product-list/:gender", name: RouteNameEnum.ProductList, component: ProductList },
+				{ path: "product-detail/:slug", name: RouteNameEnum.ProductDetail, component: ProductDetail },
+				{ path: "cart-detail", name: RouteNameEnum.CartDetail, component: CartDetail },
+				{ path: "user-account", name: RouteNameEnum.UserAccount, component: UserAccount },
 			],
 		},
 		// admin routes
 		{
 			path: "/admin",
 			redirect: "/admin/dashboard",
-			name: "admin root page",
+			name: RouteNameEnum.AdminRootPage,
 			component: TheAdminLayout,
 			children: [
-				{ path: "dashboard", name: "admin dashboard", component: DashBoard },
+				{ path: "dashboard", name: RouteNameEnum.AdminDashBoard, component: DashBoard },
 				{ path: "product", name: RouteNameEnum.AdminProductList, component: AdminProductList },
 				{ path: "product/:id", name: RouteNameEnum.AdminProductDetail, component: AdminProductDetail },
 				{ path: "user", name: RouteNameEnum.AdminUserList, component: AdminUserList },
@@ -57,9 +59,9 @@ const router = createRouter({
 				},
 			],
 		},
-		{ path: "/checkout", name: "checkout", component: Checkout },
-		{ path: "/login", name: "login", component: Login },
-		{ path: "/registration", name: "registration", component: Registration },
+		{ path: "/checkout", name: RouteNameEnum.Checkout, component: Checkout },
+		{ path: "/login", name: RouteNameEnum.Login, component: Login },
+		{ path: "/registration", name: RouteNameEnum.Registration, component: Registration },
 	],
 });
 

@@ -71,7 +71,12 @@ export default {
 								}
 							})
 							.catch((err) => {
-								this.$showError("Có lỗi xảy ra");
+								let errorMessage = "Có lỗi xảy ra";
+								if (err.response.status == 401)
+									errorMessage = "Bạn không có quyền thực hiện chức năng này";
+								else if (err.response.status == 403)
+									errorMessage = "Bạn không có quyền thực hiện chức năng này";
+								this.$showError(errorMessage);
 							});
 					},
 				}),
@@ -79,8 +84,13 @@ export default {
 			gridColumns: [
 				{ caption: "Mã phiếu nhập", dataType: "string", dataField: "supplyCode" },
 				{ caption: "Nhà cung cấp", dataType: "string", cellTemplate: "supplierTemplate" },
-				{ caption: "Ngày nhập", dataType: "datetime", dataField: "supplyDate" },
-				{ caption: "Giá trị", dataType: "number", format: "currency", dataField: "totalPrice" },
+				{ caption: "Ngày nhập", dataType: "date", dataField: "supplyDate", format: "dd/MM/yyyy HH:mm" },
+				{
+					caption: "Giá trị",
+					dataType: "number",
+					format: { style: "currency", currency: "vnd" },
+					dataField: "totalPrice",
+				},
 			],
 		};
 	},

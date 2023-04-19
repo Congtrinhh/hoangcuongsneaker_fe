@@ -6,7 +6,7 @@
 			<!-- tên sp chính -->
 			<div class="v-form-group">
 				<label for="" class="v-form-label">Tên sản phẩm <span class="required"></span></label>
-				<DxTextBox v-model="model.name">
+				<DxTextBox v-model="model.name" width="30vw">
 					<DxValidator>
 						<DxRequiredRule :message="errorMessage.name.required" />
 					</DxValidator>
@@ -21,6 +21,7 @@
 					placeholder="Chọn hãng"
 					v-model="model.brand"
 					:data-source="brandDataSource"
+					width="30vw"
 					@valueChanged="handleBrandChanged"
 				>
 					<DxValidator>
@@ -32,7 +33,7 @@
 			<!-- mô tả -->
 			<div class="v-form-group">
 				<label for="" class="v-form-label">Mô tả</label>
-				<DxTextBox v-model="model.description" />
+				<DxTextBox v-model="model.description" width="30vw" />
 			</div>
 
 			<!-- trạng thái -->
@@ -62,7 +63,7 @@
 						</div>
 					</template>
 				</div>
-				<dx-button text="Thêm ảnh" :elementAttr="{ class: 'btn-add-image' }"></dx-button>
+				<!-- <dx-button text="Thêm ảnh" :elementAttr="{ class: 'btn-add-image' }"></dx-button> -->
 				<input
 					type="file"
 					accept="image/png, image/jpeg"
@@ -268,7 +269,12 @@ export default {
 										}
 									})
 									.catch((err) => {
-										console.log(err);
+										let errorMessage = "Có lỗi xảy ra";
+										if (err.response.status == 401)
+											errorMessage = "Bạn không có quyền thực hiện chức năng này";
+										else if (err.response.status == 403)
+											errorMessage = "Bạn không có quyền thực hiện chức năng này";
+										this.$showError(errorMessage);
 									});
 							} else {
 								const myPromise = new Promise((resolve, reject) => {
@@ -350,9 +356,15 @@ export default {
 					dataType: "number",
 					dataField: "rrPrice",
 					width: 100,
-					format: "currency",
+					format: { style: "currency", currency: "vnd" },
 				},
-				{ caption: "Giá bán", dataType: "number", dataField: "sellPrice", width: 100, format: "currency" },
+				{
+					caption: "Giá bán",
+					dataType: "number",
+					dataField: "sellPrice",
+					width: 100,
+					format: { style: "currency", currency: "vnd" },
+				},
 				{ caption: "Số lượng có", dataType: "number", dataField: "quantity", width: 100 },
 				{ caption: "Giới tính", cellTemplate: "genderTemplate", width: 100, dataField: "gender" },
 				{ caption: "Màu", cellTemplate: "colorTemplate", dataField: "color" },
@@ -481,7 +493,13 @@ export default {
 								this.$showSuccess("Cập nhật thành công");
 							}
 						})
-						.catch((err) => console.log(err));
+						.catch((err) => {
+							let errorMessage = "Có lỗi xảy ra";
+							if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							else if (err.response.status == 403)
+								errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							this.$showError(errorMessage);
+						});
 				} else {
 					// create
 					AdminProductApi.create(this.model)
@@ -491,7 +509,6 @@ export default {
 								const newlyCreatedProductId = res.data.data[0].id;
 								const formData = new FormData();
 								for (var i = 0; i < this.$refs.imageFiles.files.length; i++) {
-									debugger;
 									let file = this.$refs.imageFiles.files[i];
 									formData.append("files[" + i + "]", file);
 								}
@@ -507,10 +524,23 @@ export default {
 											this.$router.push({ name: this.$routeNameEnum.AdminProductList });
 										} else this.$showError();
 									})
-									.catch((error) => this.$showError());
+									.catch((error) => {
+										let errorMessage = "Có lỗi xảy ra";
+										if (err.response.status == 401)
+											errorMessage = "Bạn không có quyền thực hiện chức năng này";
+										else if (err.response.status == 403)
+											errorMessage = "Bạn không có quyền thực hiện chức năng này";
+										this.$showError(errorMessage);
+									});
 							} else this.$showError();
 						})
-						.catch((err) => this.$showError());
+						.catch((err) => {
+							let errorMessage = "Có lỗi xảy ra";
+							if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							else if (err.response.status == 403)
+								errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							this.$showError(errorMessage);
+						});
 				}
 			}
 		},
@@ -666,10 +696,15 @@ export default {
 				.then((res) => {
 					if (res.data.isSuccessful) {
 						this.model = res.data.data[0];
+					} else {
+						this.$showError();
 					}
 				})
 				.catch((err) => {
-					//
+					let errorMessage = "Có lỗi xảy ra";
+					if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					else if (err.response.status == 403) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					this.$showError(errorMessage);
 				});
 		}
 	},

@@ -148,20 +148,31 @@ export default {
 								}
 							})
 							.catch((err) => {
-								this.$showError("Có lỗi xảy ra");
+								let errorMessage = "Có lỗi xảy ra";
+								if (err.response.status == 401)
+									errorMessage = "Bạn không có quyền thực hiện chức năng này";
+								else if (err.response.status == 403)
+									errorMessage = "Bạn không có quyền thực hiện chức năng này";
+								this.$showError(errorMessage);
 							});
 					},
 				}),
 			}),
 			gridColumns: [
 				{ caption: "Mã đơn hàng", dataType: "string", dataField: "code" },
-				{ caption: "Trị giá (vnd)", dataType: "number", dataField: "billPrice" },
+				{
+					caption: "Trị giá (vnd)",
+					dataType: "number",
+					dataField: "billPrice",
+					format: { style: "currency", currency: "vnd" },
+				},
 				{ caption: "Trạng thái", dataField: "isActive", cellTemplate: "statusTemplate" },
-				{ caption: "Ngày tạo", dataType: "date", dataField: "createdAt" },
+				{ caption: "Ngày tạo", dataType: "date", dataField: "createdAt", format: "dd/MM/yyyy HH:mm" },
 				{
 					caption: "Ngày giao xong",
 					dataType: "date",
 					dataField: "shippedAt",
+					format: "dd/MM/yyyy HH:mm",
 					visible: false,
 				},
 				{
@@ -254,6 +265,7 @@ export default {
 
 			const order = data.data;
 			order.shippingStatus = updateStatus;
+			order.isActive = true;
 
 			if (
 				order.shippingStatus == ShippingStatusEnum.delivered ||
@@ -266,7 +278,12 @@ export default {
 				.then((res) => {
 					this.gridDataSource.reload();
 				})
-				.catch((err) => this.$showError());
+				.catch((err) => {
+					let errorMessage = "Có lỗi xảy ra";
+					if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					else if (err.response.status == 403) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					this.$showError(errorMessage);
+				});
 		},
 		handleBtnDeactivateOrderClicked($event, data) {
 			$event.stopPropagation();
@@ -276,8 +293,14 @@ export default {
 			OrderApi.update(order.id, order)
 				.then((res) => {
 					this.gridDataSource.reload();
+					this.$showSuccess("Huỷ đơn hàng thành công");
 				})
-				.catch((err) => this.$showError());
+				.catch((err) => {
+					let errorMessage = "Có lỗi xảy ra";
+					if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					else if (err.response.status == 403) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					this.$showError(errorMessage);
+				});
 		},
 		/**
 		 *

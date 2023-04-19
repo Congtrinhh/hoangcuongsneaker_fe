@@ -5,17 +5,17 @@
 		<div class="main-content">
 			<div class="v-form-group">
 				<label for="" class="v-form-label">Tên đăng nhập</label>
-				<DxTextBox v-model="model.userName" :read-only="true" />
+				<DxTextBox v-model="model.userName" :read-only="true" width="30vw" />
 			</div>
 
 			<div class="v-form-group">
 				<label for="" class="v-form-label"> Email </label>
-				<DxTextBox v-model="model.email" :read-only="true" />
+				<DxTextBox v-model="model.email" :read-only="true" width="30vw" />
 			</div>
 
 			<div class="v-form-group">
 				<label for="" class="v-form-label">Số điện thoại </label>
-				<DxTextBox v-model="model.phone" :read-only="true" />
+				<DxTextBox v-model="model.phone" :read-only="true" width="30vw" />
 			</div>
 
 			<!-- trạng thái -->
@@ -117,8 +117,13 @@ export default {
 			//#region Danh sách đơn hàng
 			gridColumns: [
 				{ caption: "Mã đơn hàng", dataType: "string", dataField: "code" },
-				{ caption: "Trị giá (vnd)", dataType: "number", dataField: "billPrice" },
-				{ caption: "Ngày tạo", dataType: "date", dataField: "createdAt" },
+				{
+					caption: "Trị giá",
+					dataType: "number",
+					dataField: "billPrice",
+					format: { style: "currency", currency: "vnd" },
+				},
+				{ caption: "Ngày tạo", dataType: "date", dataField: "createdAt", format: "dd/MM/yyyy HH:mm" },
 				{ caption: "Trạng thái đơn hàng", dataField: "shippingStatus", cellTemplate: "shippingStatusTemplate" },
 				{ caption: "Trạng thái", dataField: "isActive", cellTemplate: "statusTemplate" },
 			],
@@ -157,7 +162,10 @@ export default {
 					}
 				})
 				.catch((err) => {
-					this.$showError();
+					let errorMessage = "Có lỗi xảy ra";
+					if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					else if (err.response.status == 403) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					this.$showError(errorMessage);
 				});
 		}
 	},

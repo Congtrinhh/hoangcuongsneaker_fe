@@ -12,9 +12,9 @@ export function registerGlobalFunctions(app) {
 				notify(
 					{
 						message: message,
-						width: 240,
+						width: 300,
 						type: ToastType.success,
-						displayTime: 3500,
+						displayTime: 4000,
 						animation: {
 							show: {
 								type: "fade",
@@ -33,9 +33,9 @@ export function registerGlobalFunctions(app) {
 				notify(
 					{
 						message: message,
-						width: 200,
+						width: 300,
 						type: ToastType.warning,
-						displayTime: 3500,
+						displayTime: 4000,
 						animation: {
 							show: {
 								type: "fade",
@@ -54,9 +54,9 @@ export function registerGlobalFunctions(app) {
 				notify(
 					{
 						message: message,
-						width: 200,
+						width: 300,
 						type: ToastType.error,
-						displayTime: 3500,
+						displayTime: 4000,
 						animation: {
 							show: {
 								type: "fade",
@@ -75,9 +75,9 @@ export function registerGlobalFunctions(app) {
 				notify(
 					{
 						message: message,
-						width: 200,
+						width: 300,
 						type: ToastType.info,
-						displayTime: 3500,
+						displayTime: 4000,
 						animation: {
 							show: {
 								type: "fade",

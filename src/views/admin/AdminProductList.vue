@@ -99,7 +99,12 @@ export default {
 			gridColumns: [
 				{ caption: "", cellTemplate: "productImage" },
 				{ caption: "Tên sản phẩm", dataType: "string", dataField: "name", minWidth: 300 },
-				{ caption: "Giá (vnd)", dataType: "number", dataField: "price" },
+				{
+					caption: "Giá",
+					dataField: "price",
+					dataType: "number",
+					format: { style: "currency", currency: "vnd" },
+				},
 				{ caption: "Trạng thái", dataField: "isActive", cellTemplate: "statusTemplate" },
 			],
 		};
@@ -107,9 +112,6 @@ export default {
 	props: {},
 	computed: {},
 	methods: {
-		log(data) {
-			console.log(data);
-		},
 		handleDataRowClicked(data) {
 			const id = data.data.id;
 			this.$router.push({

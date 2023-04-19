@@ -19,7 +19,7 @@
 											<span>{{ cartItem.size?.name }}</span>
 										</div>
 									</div>
-									<div class="cart-price">{{ getTotalPriceItem(cartItem) }}</div>
+									<div class="cart-price">{{ getCurrencyFormat(getTotalPriceItem(cartItem)) }}</div>
 								</div>
 							</div>
 						</section>
@@ -39,22 +39,30 @@
 						</section>
 						<div class="total-price-conclusion">
 							<div class="title">Tổng cộng</div>
-							<div class="price price-big">{{ totalPrice }}</div>
+							<div class="price price-big">{{ getCurrencyFormat(totalPrice) }}</div>
 						</div>
 					</div>
 				</div>
 				<div class="col-12 col-lg-7">
 					<div class="checkout-info">
 						<h1 class="website-brand d-none d-lg-block mb-2">HoangCuongSneaker</h1>
-						<div class="breadcrumb">
-							<router-link to="/cart-detail"><span>Giỏ hàng</span></router-link> &gt;
-							<span>Thông tin đơn hàng</span>
-						</div>
+
+						<nav aria-label="breadcrumb">
+							<ol class="breadcrumb">
+								<li class="breadcrumb-item">
+									<router-link to="/cart-detail"><span>Giỏ hàng</span></router-link>
+								</li>
+								<li class="breadcrumb-item"><a href="#">Thông tin đơn hàng</a></li>
+							</ol>
+						</nav>
 
 						<section class="user-info">
 							<div class="title">Thông tin đơn hàng</div>
 
-							<div class="logged-in-info">Trinh Cong (trinhquycong@gmail.com) <br />Đăng xuất here</div>
+							<div class="logged-in-info">
+								{{ userInfo.userName }} <span v-show="userInfo.email">({{ userInfo.email }})</span>
+								<br /><span class="logout-text" @click="handleLogout"> Đăng xuất</span>
+							</div>
 
 							<!-- name -->
 							<div class="v-form-group">
@@ -122,6 +130,8 @@
 						<section class="my-3">
 							<v-button @click="handleSave">Hoàn tất đơn hàng</v-button>
 						</section>
+
+						<div v-show="errorMessage" class="error my-3">{{ errorMessage }}</div>
 					</div>
 				</div>
 			</div>
@@ -138,6 +148,9 @@ import CartApi from "@/apis/user/cart-api";
 import OrderApi from "@/apis/user/order-api";
 import { useCartStore } from "@/stores/cart";
 import CustomStore from "devextreme/data/custom_store";
+import { getCurrencyFormat } from "@/helpers/common-helpers";
+import { useIndexStore } from "@/stores";
+import AuthenticationApi from "@/apis/authentication-api";
 
 export default {
 	components: { DxTextBox, DxSelectBox, DxRadioGroup, DxAccordion },
@@ -166,6 +179,8 @@ export default {
 			//#region Model chính: thông tin thanh toán
 			userInfo: {},
 			//#endregion
+			getCurrencyFormat,
+			errorMessage: "",
 		};
 	},
 	props: {
@@ -214,6 +229,7 @@ export default {
 				.catch((err) => console.log(err));
 		},
 		handleSave() {
+			this.errorMessage = "";
 			// generate address
 			this.userInfo.address = this.getAddressText();
 
@@ -221,9 +237,20 @@ export default {
 			console.log(payload);
 			OrderApi.create(payload)
 				.then((res) => {
-					debugger;
+					if (res.data.isSuccessful) {
+						this.$router.push({
+							name: this.$routeNameEnum.Home,
+						});
+
+						//update cart store
+						CartApi.clearCart();
+
+						this.$showSuccess("Thanh toán thành công");
+					} else {
+						this.errorMessage = res.data.errorMessage;
+					}
 				})
-				.catch((err) => console.log(err));
+				.catch((err) => this.$showError());
 		},
 		getAddressText() {
 			const province = this.userInfo.province?.name;
@@ -234,12 +261,29 @@ export default {
 		getPayload() {
 			let payload = {};
 			payload.user = this.userInfo;
-			payload.orderItems = this.orderItems;
+			let orderItems = this.orderItems.map((item) => {
+				item.price = item.sellPrice;
+				return item;
+			});
+			payload.orderItems = orderItems;
 			return payload;
+		},
+		/**
+		 * xu ly dang xuat nguoi dung khoi he thong
+		 */
+		handleLogout() {
+			try {
+				AuthenticationApi.doLogout();
+				this.$router.push({ name: this.$routeNameEnum.Home });
+				this.$showSuccess("Đăng xuất thành công");
+			} catch (error) {
+				this.$showError();
+			}
 		},
 	},
 	mounted() {
 		this.orderItems = CartApi.getCart();
+		this.userInfo = useIndexStore.userInfo;
 	},
 };
 </script>
@@ -247,6 +291,8 @@ export default {
 <style scoped lang="scss">
 #checkoutComponent {
 	background-color: var(--color-main-content-background);
+	padding: 16px 0 30px;
+
 	min-height: 100vh;
 	> * {
 		height: 100%;
@@ -414,6 +460,13 @@ section > .title {
 .banner {
 	padding: 20px 12px;
 	background: var(--color-background);
+}
+
+.logout-text {
+	text-decoration: underline;
+	display: inline-block;
+	margin-top: 6px;
+	cursor: pointer;
 }
 
 // Responsive

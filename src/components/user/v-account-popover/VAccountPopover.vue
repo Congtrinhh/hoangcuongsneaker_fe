@@ -1,9 +1,15 @@
 <template>
-	<div class="account-wrapper" id="accountPopoverComponent" @click="handleToggle">
-		<div class="general-info">
-			<span>Cong trinh</span>
-			<img src="@/assets/imgs/icons/angle-down.png" />
+	<div class="account-wrapper" id="accountPopoverComponent">
+		<div v-if="useIndexStore.isLoggedIn == true" class="general-info" @click="handleToggle" title="Tài khoản">
+			<div v-if="useIndexStore.userInfo?.role == 'user'">
+				<font-awesome-icon icon="fa-regular fa-user" size="lg" />
+			</div>
+			<div v-else>Tài khoản</div>
 		</div>
+		<div v-else class="general-info" @click="toLoginPage" title="Tài khoản">
+			<font-awesome-icon icon="fa-regular fa-user" size="lg" />
+		</div>
+
 		<dx-popover
 			:width="260"
 			:visible="isVisible"
@@ -18,8 +24,12 @@
 			<template #content>
 				<div class="header"></div>
 				<div class="list-option">
-					<div class="" v-for="item in loggedInOptions" :key="item.id">
-						{{ item.text }}
+					<div v-if="useIndexStore.userInfo?.role == 'user'">
+						<router-link class="" to="user-account"> Tài khoản của tôi </router-link>
+						<router-link to="" @click="handleLogout"> Đăng xuất </router-link>
+					</div>
+					<div v-else>
+						<router-link to="" @click="handleLogout"> Đăng xuất </router-link>
 					</div>
 				</div>
 			</template>
@@ -29,16 +39,19 @@
 
 <script>
 import { DxPopover } from "devextreme-vue/popover";
+import { useIndexStore } from "@/stores";
+import AuthenticationApi from "@/apis/authentication-api";
 
 export default {
 	components: { DxPopover },
 	data() {
 		return {
-			loggedInOptions: [
-				{ id: 1, text: "Tài khoản của tôi" },
-				{ id: 2, text: "Đăng xuất" },
-			],
+			// loggedInOptions: [
+			// 	{ text: "Tài khoản của tôi", to: "/user-account" },
+			// 	{ text: "Đăng xuất", to: "/logout", onClickHandler: this.handleLogout },
+			// ],
 			isVisible: false,
+			useIndexStore,
 		};
 	},
 	props: {
@@ -61,17 +74,35 @@ export default {
 	},
 	computed: {},
 	methods: {
+		/**
+		 * xu ly dang xuat nguoi dung khoi he thong
+		 */
+		handleLogout() {
+			try {
+				AuthenticationApi.doLogout();
+				this.isVisible = false;
+				this.$router.push({ name: this.$routeNameEnum.Home });
+				this.$showSuccess("Đăng xuất thành công");
+			} catch (error) {
+				this.$showError();
+			}
+		},
 		handlePopoverHiding() {
 			this.isVisible = false;
 		},
 		handleToggle() {
 			this.isVisible = !this.isVisible;
 		},
+		toLoginPage() {
+			this.$router.push({ name: this.$routeNameEnum.Login });
+		},
 	},
 };
 </script>
 
 <style scoped lang="scss">
+#accountPopoverComponent {
+}
 .account-wrapper {
 	cursor: pointer;
 	.general-info {
@@ -89,5 +120,18 @@ export default {
 .popover-header {
 	text-transform: uppercase;
 	text-align: center;
+}
+
+.list-option {
+	display: flex;
+	flex-direction: column;
+	row-gap: 6px;
+	> a:hover {
+		text-decoration: underline;
+	}
+}
+
+.font-weight-500 {
+	font-weight: 500;
 }
 </style>

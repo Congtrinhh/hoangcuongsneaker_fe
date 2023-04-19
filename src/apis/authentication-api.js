@@ -1,5 +1,7 @@
 import axios from "@/apis/axios";
 import BaseApi from "@/apis/base-api";
+import { useIndexStore } from "@/stores";
+
 class AuthenticationApi extends BaseApi {
 	constructor() {
 		super();
@@ -12,6 +14,14 @@ class AuthenticationApi extends BaseApi {
 
 	doRegistration(payload) {
 		return axios.post(`${this.controller}/registration`, payload);
+	}
+
+	doLogout() {
+		localStorage.removeItem("jwtToken");
+		localStorage.removeItem("userInfo");
+
+		useIndexStore.isLoggedIn = false;
+		useIndexStore.userInfo = null;
 	}
 }
 

@@ -8,7 +8,7 @@
 			<!-- sidebar -->
 			<TheAdminSidebar :isVisible="isVisibleSideBar" />
 			<!-- main content  -->
-			<dx-scroll-view height="calc(100vh - 48px)">
+			<dx-scroll-view height="calc(100vh - 48px)" :elementAttr="{ id: 'theAdminLayoutContent' }">
 				<div class="main-content">
 					<router-view />
 				</div>
@@ -56,5 +56,9 @@ export default {
 	.main-content {
 		padding: 12px 20px;
 	}
+}
+
+#theAdminLayoutContent {
+	width: 100%;
 }
 </style>

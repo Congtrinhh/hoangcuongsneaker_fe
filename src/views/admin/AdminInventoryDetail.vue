@@ -6,7 +6,7 @@
 			<!-- mã phiếu nhập -->
 			<div class="v-form-group">
 				<label for="" class="v-form-label">Mã phiếu nhập <span class="required"></span></label>
-				<DxTextBox v-model="model.supplyCode" :read-only="editMode != modelState.create">
+				<DxTextBox v-model="model.supplyCode" :read-only="editMode != modelState.create" width="30vw">
 					<DxValidator>
 						<DxRequiredRule :message="errorMessage.supplyCode.required" />
 					</DxValidator>
@@ -21,6 +21,7 @@
 					placeholder="Chọn nhà cung cấp"
 					v-model="model.supplier"
 					:data-source="supplierDataSource"
+					width="30vw"
 					@valueChanged="handleSupplierChanged"
 					:read-only="editMode != modelState.create"
 				>
@@ -33,7 +34,7 @@
 			<!-- Ngày nhập -->
 			<div class="v-form-group">
 				<label for="" class="v-form-label">Ngày nhập</label>
-				<DxDateBox v-model="model.supplyDate" :read-only="editMode != modelState.create">
+				<DxDateBox v-model="model.supplyDate" :read-only="editMode != modelState.create" width="30vw">
 					<DxValidator> <DxRequiredRule :message="errorMessage.supplyDate.required" /> </DxValidator
 				></DxDateBox>
 			</div>
@@ -203,16 +204,12 @@ export default {
 						return myPromise;
 					},
 					remove: (key) => {
-						debugger;
-
 						const index = this.initialDataSource.findIndex((item) => item.id == key);
 						this.initialDataSource[index].modelState = this.modelState.delete;
 
 						this.gridDataSource.reload(); // gọi lại hàm load
 					},
 					update: (key, values) => {
-						debugger;
-
 						values.supplyBillId = this.supplyBillId;
 
 						const index = this.initialDataSource.findIndex((item) => item.id == key);
@@ -228,7 +225,6 @@ export default {
 						console.log("update: ", this.initialDataSource[index]);
 					},
 					insert: (values) => {
-						debugger;
 						values.supplyBillId = this.supplyBillId;
 						values.isActive = true;
 
@@ -250,12 +246,17 @@ export default {
 				},
 				{ caption: "SKU", dataType: "string", cellTemplate: "SKUTemplate" },
 				{ caption: "Số lượng", dataField: "quantity", dataType: "number", width: 100 },
-				{ caption: "Giá", dataField: "price", dataType: "number", format: "currency" },
+				{
+					caption: "Giá",
+					dataField: "price",
+					dataType: "number",
+					format: { style: "currency", currency: "vnd" },
+				},
 				{ caption: "Giảm giá (%)", dataField: "discount", dataType: "number", width: 100 },
 				{
 					caption: "Tổng tiền",
 					dataType: "number",
-					format: "currency",
+					format: { style: "currency", currency: "vnd" },
 					calculateCellValue: this.getTotalPriceEachProductSupplyBill,
 				},
 			],
@@ -276,7 +277,13 @@ export default {
 								return { data, totalCount: data.length };
 							}
 						})
-						.catch((err) => console.log(err));
+						.catch((err) => {
+							let errorMessage = "Có lỗi xảy ra";
+							if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							else if (err.response.status == 403)
+								errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							this.$showError(errorMessage);
+						});
 				},
 				byKey: () => {
 					return {};
@@ -295,7 +302,13 @@ export default {
 								return { data, totalCount: data.length };
 							}
 						})
-						.catch((err) => console.log(err));
+						.catch((err) => {
+							let errorMessage = "Có lỗi xảy ra";
+							if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							else if (err.response.status == 403)
+								errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							this.$showError(errorMessage);
+						});
 				},
 				byKey: () => {
 					return {};
@@ -346,7 +359,13 @@ export default {
 							this.$router.push({ name: this.$routeNameEnum.AdminInventoryList });
 						}
 					})
-					.catch((err) => this.$showError());
+					.catch((err) => {
+						let errorMessage = "Có lỗi xảy ra";
+						if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+						else if (err.response.status == 403)
+							errorMessage = "Bạn không có quyền thực hiện chức năng này";
+						this.$showError(errorMessage);
+					});
 			}
 		},
 		/**
@@ -375,7 +394,10 @@ export default {
 					}
 				})
 				.catch((err) => {
-					this.$showError();
+					let errorMessage = "Có lỗi xảy ra";
+					if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					else if (err.response.status == 403) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					this.$showError(errorMessage);
 				});
 		}
 	},

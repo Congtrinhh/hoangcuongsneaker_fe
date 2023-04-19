@@ -123,7 +123,13 @@ export default {
 								return { data, totalCount: data.length };
 							}
 						})
-						.catch((err) => console.log(err));
+						.catch((err) => {
+							let errorMessage = "Có lỗi xảy ra";
+							if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							else if (err.response.status == 403)
+								errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							this.$showError(errorMessage);
+						});
 				},
 				byKey: (key) => {
 					return this.colorApi
@@ -134,7 +140,13 @@ export default {
 								return { data };
 							}
 						})
-						.catch((err) => console.log(err));
+						.catch((err) => {
+							let errorMessage = "Có lỗi xảy ra";
+							if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							else if (err.response.status == 403)
+								errorMessage = "Bạn không có quyền thực hiện chức năng này";
+							this.$showError(errorMessage);
+						});
 				},
 			}),
 			sizeFormDataSource: new CustomStore({
@@ -175,7 +187,10 @@ export default {
 					}
 				})
 				.catch((err) => {
-					this.$showError();
+					let errorMessage = "Có lỗi xảy ra";
+					if (err.response.status == 401) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					else if (err.response.status == 403) errorMessage = "Bạn không có quyền thực hiện chức năng này";
+					this.$showError(errorMessage);
 				});
 		}
 	},

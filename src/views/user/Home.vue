@@ -29,7 +29,9 @@
 					></v-product>
 				</div>
 
-				<div class="button-wrapper d-flex justify-content-center"><v-button>Mua ngay</v-button></div>
+				<div class="button-wrapper d-flex justify-content-center">
+					<v-button @click="handleBuyNowButtonClicked">Mua ngay</v-button>
+				</div>
 			</section>
 
 			<section class="mt-5 new-arrival">
@@ -43,7 +45,9 @@
 					></v-product>
 				</div>
 
-				<div class="button-wrapper d-flex justify-content-center"><v-button>Mua ngay</v-button></div>
+				<div class="button-wrapper d-flex justify-content-center">
+					<v-button @click="handleBuyNowButtonClicked">Mua ngay</v-button>
+				</div>
 			</section>
 
 			<section class="mt-5 nice-set">
@@ -109,6 +113,7 @@ export default {
 			const pagingRequestArrivalProducts = {
 				isHot: true, // nếu isHot = true, tức là sản phẩm này là hàng mới về
 				pageSize: 20,
+				isActive: true,
 			};
 			const responseArrivalProducts = await this.productApi.getPaging(pagingRequestArrivalProducts);
 			if (responseArrivalProducts.data.isSuccessful) {
@@ -119,6 +124,7 @@ export default {
 
 			const pagingRequestBestSellerProducts = {
 				isBestSeller: true,
+				isActive: true,
 				pageSize: 20,
 			};
 			const responseBestSellerProducts = await this.productApi.getPaging(pagingRequestBestSellerProducts);
@@ -135,6 +141,12 @@ export default {
 		galleryWidth() {},
 	},
 	methods: {
+		handleBuyNowButtonClicked() {
+			this.$router.push({
+				name: this.$routeNameEnum.ProductList,
+				params: { gender: 0 },
+			});
+		},
 		setGalleryWidth(x) {
 			if (x.matches) {
 				// If media query matches
@@ -150,6 +162,7 @@ export default {
 <style scoped lang="scss">
 #main-content {
 	background: var(--color-main-content-background);
+	padding-bottom: 30px;
 }
 
 .nice-set {
